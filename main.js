@@ -6,6 +6,9 @@ const ymax=180;
 const TILEWIDTH=20;
 const TILEHEIGHT=16;
 const TILESPERROW=6;
+const BGCOLOUR="rgb(112,128,144)";
+const ANIMSPEED=2;
+const MOVESPEED=4;
 
 // Game state
 var gs={
@@ -20,13 +23,18 @@ var gs={
 
   // Main character
   keystate:0,
-  x:0, // x position
+  x:xmax/2, // x position
   y:0, // y position
   vs:0, // vertical speed
   hs:0, // horizontal speed
   jump:false, // jumping
   fall:false, // falling
-  dir:0, //direction (-1=left, 0=none, 1=right)
+  dir:-1, //direction (-1=left, 0=none, 1=right)
+  frameindex:0, // current animation frame
+  walkanim:[6, 7, 8, 9, 10, 11],
+  runanim:[12, 13, 14, 15, 16, 17],
+  
+  anim:ANIMSPEED, // frames until next animation frame
 
   debug:false
 };
@@ -147,11 +155,68 @@ function drawtile(tileid, x, y)
   gs.ctx.drawImage(gs.tilemap, (tileid*TILEWIDTH) % (TILESPERROW*TILEWIDTH), Math.floor((tileid*TILEWIDTH) / (TILESPERROW*TILEWIDTH))*TILEHEIGHT, TILEWIDTH, TILEHEIGHT, x, y, TILEWIDTH, TILEHEIGHT);
 }
 
+function drawsprite(tileid, x, y)
+{
+  if (gs.dir==1)
+    gs.ctx.drawImage(gs.tilemapflip, ((TILESPERROW*TILEWIDTH)-((tileid*TILEWIDTH) % (TILESPERROW*TILEWIDTH)))-TILEWIDTH, Math.floor((tileid*TILEWIDTH) / (TILESPERROW*TILEWIDTH))*TILEHEIGHT, TILEWIDTH, TILEHEIGHT,
+      x, y, TILEWIDTH, TILEHEIGHT);
+  else
+    gs.ctx.drawImage(gs.tilemap, (tileid*TILEWIDTH) % (TILESPERROW*TILEWIDTH), Math.floor((tileid*TILEWIDTH) / (TILESPERROW*TILEWIDTH))*TILEHEIGHT, TILEWIDTH, TILEHEIGHT, x, y, TILEWIDTH, TILEHEIGHT);
+}
+
+// Update game state
+function update()
+{
+  if (gs.anim==0)
+  {
+    gs.frameindex++;
+    if (gs.frameindex>=gs.runanim.length)
+      gs.frameindex=0;
+
+    if (gs.dir==-1)
+    {
+      gs.x-=MOVESPEED;
+
+      if (gs.x<=0-TILEWIDTH)
+        gs.dir=1;
+    }
+    
+    if (gs.dir==1)
+    {
+      gs.x+=MOVESPEED;
+      
+      if (gs.x>=xmax)
+        gs.dir=-1;
+    }
+      
+    gs.anim=ANIMSPEED;
+  }
+  else
+    gs.anim--;
+}
+
+// Redraw game frame
+function redraw()
+{
+  gs.ctx.fillStyle=BGCOLOUR;
+  gs.ctx.fillRect(0, 0, gs.canvas.width, gs.canvas.height);
+
+  drawsprite(gs.runanim[gs.frameindex], gs.x, 100);
+}
+
+// Request animation frame callback
+function rafcallback(timestamp)
+{
+  update();
+  redraw();
+
+  // Request we are called on the next frame
+  window.requestAnimationFrame(rafcallback);
+}
+
 function start()
 {
-  for (var j=0; j<3; j++)
-    for (var i=0; i<TILESPERROW; i++)
-      drawtile(i+(j*TILESPERROW), i*TILEWIDTH, j*TILEHEIGHT);
+  window.requestAnimationFrame(rafcallback);
 }
 
 // Entry point
