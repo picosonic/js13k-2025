@@ -19,6 +19,34 @@ zipfile="js13k.zip"
 buildpath="tmpbuild"
 jscat="${buildpath}/min.js"
 indexcat="${buildpath}/index.html"
+assetsrc="assets/catmap.png"
+assetjs="tilemap.js"
+
+# See if the tilemap asset needs to be rebuilt
+srcdate=`stat -c %Y ${assetsrc} 2>/dev/null`
+destdate=`stat -c %Y ${assetjs} 2>/dev/null`
+
+# If no js asset found, force build
+if [ "${destdate}" == "" ]
+then
+  destdate=0
+fi
+
+# When source is newer, rebuild
+if [ ${srcdate} -gt ${destdate} ]
+then
+  echo -n "Rebuilding tilemap..."
+
+  # Clear old dest
+  echo -n "" > "${assetjs}"
+
+  # Convert from src to dest
+  echo -n 'const tilemap="data:image/png;base64,' > "${assetjs}"
+  base64 -w 0 "${assetsrc}" >> "${assetjs}"
+  echo '";' >> "${assetjs}"
+
+  echo "done"
+fi
 
 if [ "${param}" == "run" ]
 then
@@ -40,7 +68,7 @@ mkdir "${buildpath}"
 # Concatenate the JS files
 echo "Concatenating JS"
 touch "${jscat}" >/dev/null 2>&1
-for file in "main.js"
+for file in "${assetjs}" "main.js"
 do
   cat "${file}" >> "${jscat}"
 done
@@ -63,7 +91,7 @@ echo "Using closure to minify JS"
 ./closeyoureyes.sh "${jscat}" | tr -d '\n' >> "${indexcat}"
 
 # Add on the rest of the index file
-echo -n '</script><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/></head><body><div id="wrapper"><canvas id="canvas" width="640" height="360"></canvas></div></body></html>' >> "${indexcat}"
+echo -n '</script><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/></head><body><div id="wrapper"><canvas id="canvas" width="320" height="180"></canvas></div></body></html>' >> "${indexcat}"
 
 # Remove the minified JS
 rm "${jscat}" >/dev/null 2>&1

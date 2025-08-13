@@ -1,15 +1,22 @@
 // JS 13k 2025 entry
 
 // Global constants
-const xmax=640;
-const ymax=360;
+const xmax=320;
+const ymax=180;
+const TILEWIDTH=20;
+const TILEHEIGHT=16;
+const TILESPERROW=6;
 
 // Game state
 var gs={
   // Canvas
   canvas:null,
   ctx:null,
-  scale:1,
+  scale:1, // Changes when resizing window
+
+  // Tilemap image
+  tilemap:null,
+  tilemapflip:null,
 
   // Main character
   keystate:0,
@@ -135,6 +142,18 @@ function updatekeystate(e, dir)
   }
 }
 
+function drawtile(tileid, x, y)
+{
+  gs.ctx.drawImage(gs.tilemap, (tileid*TILEWIDTH) % (TILESPERROW*TILEWIDTH), Math.floor((tileid*TILEWIDTH) / (TILESPERROW*TILEWIDTH))*TILEHEIGHT, TILEWIDTH, TILEHEIGHT, x, y, TILEWIDTH, TILEHEIGHT);
+}
+
+function start()
+{
+  for (var j=0; j<3; j++)
+    for (var i=0; i<TILESPERROW; i++)
+      drawtile(i+(j*TILESPERROW), i*TILEWIDTH, j*TILEHEIGHT);
+}
+
 // Entry point
 function init()
 {
@@ -165,6 +184,29 @@ function init()
   window.addEventListener("resize", function() { playfieldsize(); });
 
   playfieldsize();
+
+  // Once image has loaded, start timeline for intro
+  gs.tilemap=new Image;
+  gs.tilemap.onload=function()
+  {
+    // Create a flipped version of the spritesheet
+    // https://stackoverflow.com/questions/21610321/javascript-horizontally-flip-an-image-object-and-save-it-into-a-new-image-objec
+    var c=document.createElement('canvas');
+    var ctx=c.getContext('2d');
+    c.width=gs.tilemap.width;
+    c.height=gs.tilemap.height;
+    ctx.scale(-1, 1);
+    ctx.drawImage(gs.tilemap, -gs.tilemap.width, 0);
+
+    gs.tilemapflip=new Image;
+    gs.tilemapflip.onload=function()
+    {
+      // Start
+      start();
+    };
+    gs.tilemapflip.src=c.toDataURL();
+  };
+  gs.tilemap.src=tilemap;
 }
 
 // Run the init() once page has loaded
