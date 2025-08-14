@@ -3,10 +3,17 @@
 // Global constants
 const xmax=320;
 const ymax=180;
-const TILEWIDTH=20;
-const TILEHEIGHT=16;
-const TILESPERROW=6;
+
+const TILEWIDTH=8;
+const TILEHEIGHT=8;
+const TILESPERROW=15;
+
+const TILECATWIDTH=20;
+const TILECATHEIGHT=16;
+const TILESCATPERROW=6;
+
 const BGCOLOUR="rgb(112,128,144)";
+
 const ANIMSPEED=2;
 const MOVESPEED=1;
 
@@ -16,6 +23,8 @@ const KEYUP=2;
 const KEYRIGHT=4;
 const KEYDOWN=8;
 const KEYACTION=16;
+
+const TILECAT=131;
 
 // Game state
 var gs={
@@ -35,8 +44,11 @@ var gs={
   friction:1,
 
   // Tilemap image
-  tilemap:null,
-  tilemapflip:null,
+  tilemap:null, // main tileset
+  tilemapcat:null, // cat sprites tileset
+  tilesloaded:false,
+  tilemapcatflip:null, // flipped cat sprites
+  catloaded:false,
 
   // Main character
   keystate:0,
@@ -174,16 +186,25 @@ function updatekeystate(e, dir)
 
 function drawtile(tileid, x, y)
 {
-  gs.ctx.drawImage(gs.tilemap, (tileid*TILEWIDTH) % (TILESPERROW*TILEWIDTH), Math.floor((tileid*TILEWIDTH) / (TILESPERROW*TILEWIDTH))*TILEHEIGHT, TILEWIDTH, TILEHEIGHT, x, y, TILEWIDTH, TILEHEIGHT);
+  gs.ctx.drawImage(gs.tilemap, (tileid*TILEWIDTH) % (TILESPERROW*TILEWIDTH), Math.floor((tileid*TILEWIDTH) / (TILESPERROW*TILEWIDTH))*TILEHEIGHT, TILEWIDTH, TILEHEIGHT, x*2, y*2, TILEWIDTH*2, TILEHEIGHT*2);
 }
 
 function drawsprite(tileid, x, y)
 {
   if (gs.flip==1)
-    gs.ctx.drawImage(gs.tilemapflip, ((TILESPERROW*TILEWIDTH)-((tileid*TILEWIDTH) % (TILESPERROW*TILEWIDTH)))-TILEWIDTH, Math.floor((tileid*TILEWIDTH) / (TILESPERROW*TILEWIDTH))*TILEHEIGHT, TILEWIDTH, TILEHEIGHT,
+    gs.ctx.drawImage(gs.tilemapflip, ((TILESCATPERROW*TILEWIDTH)-((tileid*TILEWIDTH) % (TILESCATPERROW*TILEWIDTH)))-TILEWIDTH, Math.floor((tileid*TILEWIDTH) / (TILESCATPERROW*TILEWIDTH))*TILEHEIGHT, TILEWIDTH, TILEHEIGHT,
       x, y, TILEWIDTH, TILEHEIGHT);
   else
-    gs.ctx.drawImage(gs.tilemap, (tileid*TILEWIDTH) % (TILESPERROW*TILEWIDTH), Math.floor((tileid*TILEWIDTH) / (TILESPERROW*TILEWIDTH))*TILEHEIGHT, TILEWIDTH, TILEHEIGHT, x, y, TILEWIDTH, TILEHEIGHT);
+    gs.ctx.drawImage(gs.tilemap, (tileid*TILEWIDTH) % (TILESCATPERROW*TILEWIDTH), Math.floor((tileid*TILEWIDTH) / (TILESCATPERROW*TILEWIDTH))*TILEHEIGHT, TILEWIDTH, TILEHEIGHT, x, y, TILEWIDTH, TILEHEIGHT);
+}
+
+function drawcatsprite(tileid, x, y)
+{
+  if (gs.flip==1)
+    gs.ctx.drawImage(gs.tilemapcatflip, ((TILESCATPERROW*TILECATWIDTH)-((tileid*TILECATWIDTH) % (TILESCATPERROW*TILECATWIDTH)))-TILECATWIDTH, Math.floor((tileid*TILECATWIDTH) / (TILESCATPERROW*TILECATWIDTH))*TILECATHEIGHT, TILECATWIDTH, TILECATHEIGHT,
+      x, y, TILECATWIDTH, TILECATHEIGHT);
+  else
+    gs.ctx.drawImage(gs.tilemapcat, (tileid*TILECATWIDTH) % (TILESCATPERROW*TILECATWIDTH), Math.floor((tileid*TILECATWIDTH) / (TILESCATPERROW*TILECATWIDTH))*TILECATHEIGHT, TILECATWIDTH, TILECATHEIGHT, x, y, TILECATWIDTH, TILECATHEIGHT);
 }
 
 function collisioncheck()
@@ -294,7 +315,15 @@ function redraw()
   gs.ctx.fillStyle=BGCOLOUR;
   gs.ctx.fillRect(0, 0, gs.canvas.width, gs.canvas.height);
 
-  drawsprite(gs.dir==0?3:gs.runanim[gs.frameindex], gs.x, 100);
+/*
+  // Draw level tileset
+  var i=0;
+  for (var y=0; y<10; y++)
+  for (var x=0; x<TILESPERROW; x++)
+    drawtile(i++, x*TILEWIDTH, y*TILEHEIGHT);
+*/
+
+  drawcatsprite(gs.dir==0?3:gs.runanim[gs.frameindex], gs.x, 100);
 }
 
 // Request animation frame callback
@@ -369,12 +398,13 @@ function init()
   // Set up canvas
   gs.canvas=document.getElementById("canvas");
   gs.ctx=gs.canvas.getContext("2d");
+  gs.ctx.imageSmoothingEnabled=false; // don't blur when scaling
 
   window.addEventListener("resize", function() { playfieldsize(); });
 
   playfieldsize();
 
-  // Once image has loaded, start timeline for intro
+  // Once loaded, start
   gs.tilemap=new Image;
   gs.tilemap.onload=function()
   {
@@ -390,12 +420,37 @@ function init()
     gs.tilemapflip=new Image;
     gs.tilemapflip.onload=function()
     {
-      // Start
-      start();
+      gs.tilesloaded=true;
+      if (gs.catloaded)
+        start();
     };
     gs.tilemapflip.src=c.toDataURL();
   };
   gs.tilemap.src=tilemap;
+
+  // Load cat tiles, and create a flipped version
+  gs.tilemapcat=new Image;
+  gs.tilemapcat.onload=function()
+  {
+    // Create a flipped version of the spritesheet
+    // https://stackoverflow.com/questions/21610321/javascript-horizontally-flip-an-image-object-and-save-it-into-a-new-image-objec
+    var c=document.createElement('canvas');
+    var ctx=c.getContext('2d');
+    c.width=gs.tilemapcat.width;
+    c.height=gs.tilemapcat.height;
+    ctx.scale(-1, 1);
+    ctx.drawImage(gs.tilemapcat, -gs.tilemapcat.width, 0);
+
+    gs.tilemapcatflip=new Image;
+    gs.tilemapcatflip.onload=function()
+    {
+      gs.catloaded=true;
+      if (gs.tilesloaded)
+        start();
+    };
+    gs.tilemapcatflip.src=c.toDataURL();
+  };
+  gs.tilemapcat.src=tilemapcat;
 }
 
 // Run the init() once page has loaded

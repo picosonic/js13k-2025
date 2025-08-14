@@ -19,10 +19,12 @@ zipfile="js13k.zip"
 buildpath="tmpbuild"
 jscat="${buildpath}/min.js"
 indexcat="${buildpath}/index.html"
-assetsrc="assets/catmap.png"
-assetjs="tilemap.js"
+assetsrc="assets/tilemap_packed.png"
+assetcatsrc="assets/catmap.png"
+assetjs="tilemaps.js"
 
-# See if the tilemap asset needs to be rebuilt
+# See if the tilemaps asset needs to be rebuilt
+srcdatecat=`stat -c %Y ${assetcatsrc} 2>/dev/null`
 srcdate=`stat -c %Y ${assetsrc} 2>/dev/null`
 destdate=`stat -c %Y ${assetjs} 2>/dev/null`
 
@@ -32,16 +34,20 @@ then
   destdate=0
 fi
 
-# When source is newer, rebuild
-if [ ${srcdate} -gt ${destdate} ]
+# When either source is newer, rebuild
+if [ ${srcdate} -gt ${destdate} -o ${srcdatecat} -gt ${destdate} ]
 then
-  echo -n "Rebuilding tilemap..."
+  echo -n "Rebuilding tilemaps JS..."
 
   # Clear old dest
   echo -n "" > "${assetjs}"
 
   # Convert from src to dest
-  echo -n 'const tilemap="data:image/png;base64,' > "${assetjs}"
+  echo -n 'const tilemapcat="data:image/png;base64,' > "${assetjs}"
+  base64 -w 0 "${assetcatsrc}" >> "${assetjs}"
+  echo '";' >> "${assetjs}"
+
+  echo -n 'const tilemap="data:image/png;base64,' >> "${assetjs}"
   base64 -w 0 "${assetsrc}" >> "${assetjs}"
   echo '";' >> "${assetjs}"
 
