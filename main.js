@@ -19,6 +19,13 @@ const KEYACTION=16;
 
 // Game state
 var gs={
+  // animation frame of reference
+  step:(1/60), // target step time @ 60 fps
+  acc:0, // accumulated time since last frame
+  lasttime:0, // time of last frame
+  fps:0, // current FPS
+  frametimes:[], // array of frame times
+
   // Canvas
   canvas:null,
   ctx:null,
@@ -45,11 +52,12 @@ var gs={
   frameindex:0, // current animation frame
   walkanim:[6, 7, 8, 9, 10, 11],
   runanim:[12, 13, 14, 15, 16, 17],
-  
+
   // Animation
   anim:ANIMSPEED, // frames until next animation frame
   timeline:new timelineobj(), // timeline for general animation
 
+  // Debug flag
   debug:false
 };
 
@@ -230,10 +238,10 @@ function updateanimation()
 
     if (gs.dir==-1)
       gs.x-=MOVESPEED;
-    
+
     if (gs.dir==1)
       gs.x+=MOVESPEED;
-      
+
     gs.anim=ANIMSPEED;
   }
   else
@@ -292,8 +300,39 @@ function redraw()
 // Request animation frame callback
 function rafcallback(timestamp)
 {
-  update();
-  redraw();
+  if (gs.debug)
+  {
+    // Calculate FPS
+    while ((gs.frametimes.length>0) && (gs.frametimes[0]<=(timestamp-1000)))
+      gs.frametimes.shift(); // Remove all entries older than a second
+
+    gs.frametimes.push(timestamp); // Add current time
+    gs.fps=gs.frametimes.length; // FPS = length of times in array
+  }
+
+  // First time round, just save epoch
+  if (gs.lasttime>0)
+  {
+    // Determine accumulated time since last call
+    gs.acc+=((timestamp-gs.lasttime) / 1000);
+
+    // If it's more than 15 seconds since last call, reset
+    if ((gs.acc>gs.step) && ((gs.acc/gs.step)>(60*15)))
+      gs.acc=gs.step*2;
+
+    // Process "steps" since last call
+    while (gs.acc>gs.step)
+    {
+      update();
+
+      gs.acc-=gs.step;
+    }
+
+    redraw();
+  }
+
+  // Remember when we were last called
+  gs.lasttime=timestamp;
 
   // Request we are called on the next frame
   window.requestAnimationFrame(rafcallback);
