@@ -32,3 +32,9 @@ Here is a rough diary of progress as posted on [Twitter](https://twitter.com/fem
 Looked into [Black Cat on Wikipedia](https://en.wikipedia.org/wiki/Black_cat), to have a think about possible game ideas. I also let me son know the theme soon after annoucement as he is keen to help me on it this year.
 
 Padded out the build environment and dev workflow.
+
+Found a free to use [black cat tilemap](https://opengameart.org/content/cat-sprites) with no attribution, credit [Shepardskin](Shepardskin)
+
+Made background transparent, aligned all the sprites to a 20x16 grid.
+
+Mocked up a quick sprite animation test where the cat runs left and right across the screen.
