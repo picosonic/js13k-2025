@@ -52,8 +52,10 @@ var gs={
 
   // Main character
   keystate:0,
-  x:xmax/2, // x position
+  x:0, // x position
   y:0, // y position
+  sx:0, // start x position (for current level)
+  sy:0, // start y position (for current level)
   vs:0, // vertical speed
   hs:0, // horizontal speed
   jump:false, // jumping
@@ -64,6 +66,16 @@ var gs={
   frameindex:0, // current animation frame
   walkanim:[6, 7, 8, 9, 10, 11],
   runanim:[12, 13, 14, 15, 16, 17],
+
+  // Level attributes
+  level:0, // Level number (0 based)
+  width:0, // Width in tiles
+  height:0, // height in tiles
+  xoffset:0, // current view offset from left (horizontal scroll)
+  yoffset:0, // current view offset from top (vertical scroll)
+
+  // Tiles
+  tiles:[], // copy of current level (to allow destruction)
 
   // Animation
   anim:ANIMSPEED, // frames until next animation frame
@@ -309,21 +321,87 @@ function update()
   updatemovements();
 }
 
+function drawlevel()
+{
+  for (var y=0; y<gs.height; y++)
+  {
+    for (var x=0; x<gs.width; x++)
+    {
+      var tile=parseInt(gs.tiles[(y*gs.width)+x]||1, 10);
+      drawtile(tile-1, x*TILEWIDTH, y*TILEHEIGHT);
+    }
+  }
+}
+
 // Redraw game frame
 function redraw()
 {
+  // TODO Scroll to keep player in view
+
+  // Clear the canvas
   gs.ctx.fillStyle=BGCOLOUR;
   gs.ctx.fillRect(0, 0, gs.canvas.width, gs.canvas.height);
 
-/*
-  // Draw level tileset
-  var i=0;
-  for (var y=0; y<10; y++)
-  for (var x=0; x<TILESPERROW; x++)
-    drawtile(i++, x*TILEWIDTH, y*TILEHEIGHT);
-*/
+  // Draw the level
+  drawlevel();
 
-  drawcatsprite(gs.dir==0?3:gs.runanim[gs.frameindex], gs.x, 100);
+  // TODO Draw the characters
+
+  // Draw the player
+  drawcatsprite(gs.dir==0?3:gs.runanim[gs.frameindex], gs.x, gs.y);
+}
+
+function loadlevel(level)
+{
+  // Make sure it exists
+  if ((level>=0) && (levels.length-1<level)) return;
+
+  // Set current level to new one
+  gs.level=level;
+
+  // Deep copy tiles list to allow changes
+  gs.tiles=JSON.parse(JSON.stringify(levels[gs.level].tiles));
+
+  // Get width/height of new level
+  gs.width=parseInt(levels[gs.level].width, 10);
+  gs.height=parseInt(levels[gs.level].height, 10);
+
+  // Populate chars (non solid tiles)
+  for (var y=0; y<gs.height; y++)
+  {
+    for (var x=0; x<gs.width; x++)
+    {
+      var tile=parseInt(levels[gs.level].chars[(y*gs.width)+x]||0, 10);
+
+      if (tile!=0)
+      {
+        var obj={id:(tile-1), x:(x*TILEWIDTH), y:(y*TILEHEIGHT), flip:false, hs:0, vs:0, del:false};
+
+        switch (tile-1)
+        {
+          case TILECAT: // Player
+            gs.x=obj.x*2; // Set current position
+            gs.y=obj.y*2;
+
+            gs.sx=gs.x; // Set start position
+            gs.sy=gs.y;
+
+            gs.vs=0; // Start not moving
+            gs.hs=0;
+            gs.jump=false;
+            gs.fall=false;
+            gs.dir=0;
+            gs.flip=false;
+            break;
+
+          default:
+            break;
+        }
+      }
+    }
+  }
+
+  // TODO hard scroll to player
 }
 
 // Request animation frame callback
@@ -369,6 +447,7 @@ function rafcallback(timestamp)
 
 function start()
 {
+  loadlevel(gs.level);
   window.requestAnimationFrame(rafcallback);
 }
 
