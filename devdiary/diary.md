@@ -55,3 +55,11 @@ Support for non-60Hz refresh rates
 Added second tileset for levels
 
 Levels are now loaded and drawn
+
+15th August
+-----------
+Added ability to jump
+
+Expanded test level to test jumps
+
+Added level scrolling
