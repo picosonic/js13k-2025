@@ -147,6 +147,74 @@ function drawcatsprite(tileid, x, y)
     gs.ctx.drawImage(gs.tilemapcat, (tileid*TILECATWIDTH) % (TILESCATPERROW*TILECATWIDTH), Math.floor((tileid*TILECATWIDTH) / (TILESCATPERROW*TILECATWIDTH))*TILECATHEIGHT, TILECATWIDTH, TILECATHEIGHT, Math.floor(x)-(gs.xoffset*2), Math.floor(y)-(gs.yoffset*2), TILECATWIDTH, TILECATHEIGHT);
 }
 
+// Load level
+function loadlevel(level)
+{
+  // Make sure it exists
+  if ((level>=0) && (levels.length-1<level)) return;
+
+  // Set current level to new one
+  gs.level=level;
+
+  // Deep copy tiles list to allow changes
+  gs.tiles=JSON.parse(JSON.stringify(levels[gs.level].tiles));
+
+  // Get width/height of new level
+  gs.width=parseInt(levels[gs.level].width, 10);
+  gs.height=parseInt(levels[gs.level].height, 10);
+
+  // Populate chars (non solid tiles)
+  for (var y=0; y<gs.height; y++)
+  {
+    for (var x=0; x<gs.width; x++)
+    {
+      var tile=parseInt(levels[gs.level].chars[(y*gs.width)+x]||0, 10);
+
+      if (tile!=0)
+      {
+        var obj={id:(tile-1), x:(x*TILEWIDTH), y:(y*TILEHEIGHT), flip:false, hs:0, vs:0, del:false};
+
+        switch (tile-1)
+        {
+          case TILECAT: // Player
+            gs.x=obj.x; // Set current position
+            gs.y=(obj.y-1);
+
+            gs.sx=gs.x; // Set start position
+            gs.sy=gs.y;
+
+            gs.vs=0; // Start not moving
+            gs.hs=0;
+            gs.jump=false;
+            gs.fall=false;
+            gs.dir=0;
+            gs.flip=false;
+            break;
+
+          default:
+            break;
+        }
+      }
+    }
+  }
+
+  // Move scroll offset to player with damping disabled
+  scrolltoplayer(false);
+}
+
+// Draw level
+function drawlevel()
+{
+  for (var y=0; y<gs.height; y++)
+  {
+    for (var x=0; x<gs.width; x++)
+    {
+      var tile=parseInt(gs.tiles[(y*gs.width)+x]||1, 10);
+      drawtile(tile-1, x*TILEWIDTH, y*TILEHEIGHT);
+    }
+  }
+}
+
 // Check if player has left the map
 function offmapcheck()
 {
@@ -398,18 +466,6 @@ function update()
   updatemovements();
 }
 
-function drawlevel()
-{
-  for (var y=0; y<gs.height; y++)
-  {
-    for (var x=0; x<gs.width; x++)
-    {
-      var tile=parseInt(gs.tiles[(y*gs.width)+x]||1, 10);
-      drawtile(tile-1, x*TILEWIDTH, y*TILEHEIGHT);
-    }
-  }
-}
-
 // Scroll level to player
 function scrolltoplayer(dampened)
 {
@@ -485,60 +541,6 @@ function redraw()
 
   // Draw the player
   drawcatsprite(gs.dir==0?3:gs.runanim[gs.frameindex], gs.x*2, gs.y*2);
-}
-
-function loadlevel(level)
-{
-  // Make sure it exists
-  if ((level>=0) && (levels.length-1<level)) return;
-
-  // Set current level to new one
-  gs.level=level;
-
-  // Deep copy tiles list to allow changes
-  gs.tiles=JSON.parse(JSON.stringify(levels[gs.level].tiles));
-
-  // Get width/height of new level
-  gs.width=parseInt(levels[gs.level].width, 10);
-  gs.height=parseInt(levels[gs.level].height, 10);
-
-  // Populate chars (non solid tiles)
-  for (var y=0; y<gs.height; y++)
-  {
-    for (var x=0; x<gs.width; x++)
-    {
-      var tile=parseInt(levels[gs.level].chars[(y*gs.width)+x]||0, 10);
-
-      if (tile!=0)
-      {
-        var obj={id:(tile-1), x:(x*TILEWIDTH), y:(y*TILEHEIGHT), flip:false, hs:0, vs:0, del:false};
-
-        switch (tile-1)
-        {
-          case TILECAT: // Player
-            gs.x=obj.x; // Set current position
-            gs.y=(obj.y-1);
-
-            gs.sx=gs.x; // Set start position
-            gs.sy=gs.y;
-
-            gs.vs=0; // Start not moving
-            gs.hs=0;
-            gs.jump=false;
-            gs.fall=false;
-            gs.dir=0;
-            gs.flip=false;
-            break;
-
-          default:
-            break;
-        }
-      }
-    }
-  }
-
-  // Move scroll offset to player with damping disabled
-  scrolltoplayer(false);
 }
 
 // Request animation frame callback
