@@ -84,8 +84,11 @@ var gs={
   // Tiles
   tiles:[], // copy of current level (to allow destruction)
 
-  // Animation
+  // Characters
+  chars:[],
   anim:ANIMSPEED, // frames until next animation frame
+
+  // Timeline for animation
   timeline:new timelineobj(), // timeline for general animation
 
   // Debug flag
@@ -135,7 +138,27 @@ function drawtile(tileid, x, y)
   gs.ctx.drawImage(gs.tilemap, (tileid*TILEWIDTH) % (TILESPERROW*TILEWIDTH), Math.floor((tileid*TILEWIDTH) / (TILESPERROW*TILEWIDTH))*TILEHEIGHT, TILEWIDTH, TILEHEIGHT, (x-gs.xoffset)*2, (y-gs.yoffset)*2, TILEWIDTH*2, TILEHEIGHT*2);
 }
 
-// TODO Draw sprite
+// Draw sprite
+function drawsprite(sprite)
+{
+  // Don't draw sprite 0 (background)
+  if (sprite.id==0) return;
+
+  // Clip to what's visible
+  if (((Math.floor(sprite.x)-gs.xoffset)<-TILEWIDTH) && // clip left
+      ((Math.floor(sprite.x)-gs.xoffset)>XMAX) && // clip right
+      ((Math.floor(sprite.y)-gs.yoffset)<-TILEHEIGHT) && // clip top
+      ((Math.floor(sprite.y)-gs.yoffset)>YMAX))   // clip bottom
+    return;
+
+  if (sprite.flip)
+    gs.ctx.drawImage(gs.tilemapflip, ((TILESPERROW*TILEWIDTH)-((sprite.id*TILEWIDTH) % (TILESPERROW*TILEWIDTH)))-TILEWIDTH, Math.floor((sprite.id*TILEWIDTH) / (TILESPERROW*TILEWIDTH))*TILEHEIGHT, TILEWIDTH, TILEHEIGHT,
+      (Math.floor(sprite.x)-gs.xoffset)*2, (Math.floor(sprite.y)-gs.yoffset)*2, TILEWIDTH*2, TILEHEIGHT*2);
+  else
+    gs.ctx.drawImage(gs.tilemap, (sprite.id*TILEWIDTH) % (TILESPERROW*TILEWIDTH), Math.floor((sprite.id*TILEWIDTH) / (TILESPERROW*TILEWIDTH))*TILEHEIGHT, TILEWIDTH, TILEHEIGHT,
+      (Math.floor(sprite.x)-gs.xoffset)*2, (Math.floor(sprite.y)-gs.yoffset)*2, TILEWIDTH*2, TILEHEIGHT*2);
+}
+
 
 // Draw player sprite
 function drawcatsprite(tileid, x, y)
@@ -163,6 +186,8 @@ function loadlevel(level)
   gs.width=parseInt(levels[gs.level].width, 10);
   gs.height=parseInt(levels[gs.level].height, 10);
 
+  gs.chars=[];
+
   // Populate chars (non solid tiles)
   for (var y=0; y<gs.height; y++)
   {
@@ -178,7 +203,7 @@ function loadlevel(level)
         {
           case TILECAT: // Player
             gs.x=obj.x; // Set current position
-            gs.y=(obj.y-1);
+            gs.y=obj.y;
 
             gs.sx=gs.x; // Set start position
             gs.sy=gs.y;
@@ -192,11 +217,14 @@ function loadlevel(level)
             break;
 
           default:
+            gs.chars.push(obj); // Everything else
             break;
         }
       }
     }
   }
+
+  // TODO Sort chars such sprites are at the end (so are drawn last, i.e on top)
 
   // Move scroll offset to player with damping disabled
   scrolltoplayer(false);
@@ -213,6 +241,13 @@ function drawlevel()
       drawtile(tile-1, x*TILEWIDTH, y*TILEHEIGHT);
     }
   }
+}
+
+// Draw chars
+function drawchars()
+{
+  for (var id=0; id<gs.chars.length; id++)
+    drawsprite(gs.chars[id]);
 }
 
 // Check if player has left the map
@@ -523,7 +558,6 @@ function scrolltoplayer(dampened)
   }
 }
 
-
 // Redraw game frame
 function redraw()
 {
@@ -537,7 +571,8 @@ function redraw()
   // Draw the level
   drawlevel();
 
-  // TODO Draw the characters
+  // Draw the characters
+  drawchars();
 
   // Draw the player
   drawcatsprite(gs.dir==0?3:gs.runanim[gs.frameindex], gs.x*2, gs.y*2);
