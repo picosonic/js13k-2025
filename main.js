@@ -19,7 +19,8 @@ const BGCOLOUR="rgb(82,98,114)";
 const ANIMSPEED=2;
 const WALKSPEED=2;
 const RUNSPEED=3;
-const JUMPSPEED=6;
+const JUMPSPEED=6; // jump height
+const SPRINGSPEED=10; // jump height on a spring
 const CATSAT=60; // time after stopping until sitting
 const RUNTIME=120; // time after starting to walk before running
 
@@ -30,6 +31,9 @@ const KEYRIGHT=4;
 const KEYDOWN=8;
 const KEYACTION=16;
 
+const TILENONE=0;
+const TILESPRINGUP=30;
+const TILESPRINGDOWN=15;
 const TILEMAGNET=89;
 const TILECAT=131;
 
@@ -71,6 +75,7 @@ var gs={
   dir:0, // direction (-1=left, 0=none, 1=right)
   speed:WALKSPEED, // walking speed
   jumpspeed:JUMPSPEED, // jumping speed
+  springspeed:SPRINGSPEED,
   coyote:0, // coyote timer (time after leaving ground where you can still jump)
   pausetimer:0, // countdown timer after stopping movement before sitting down
   runtimer:0, // countdown timer after walking starts before running
@@ -355,18 +360,24 @@ function collide(px, py, pw, ph)
       if ((tile-1)!=0)
       {
         if (overlap(px, py, pw, ph, x*TILEWIDTH, y*TILEHEIGHT, TILEWIDTH, TILEHEIGHT))
-          return true;
+          return tile;
       }
     }
   }
 
-  return false;
+  return TILENONE;
 }
 
-// Collision check with player hitbox
-function playercollide(x, y)
+// Collision check with player hitbox, return tile
+function playerlook(x, y)
 {
   return collide(x+(TILEWIDTH/3), y+((TILEHEIGHT/5)*2), TILEWIDTH/3, (TILEHEIGHT/5)*3);
+}
+
+// Collision check with player hitbox, true/flase
+function playercollide(x, y)
+{
+  return (parseInt(playerlook(x, y))>0);
 }
 
 // Check if player on the ground or falling
@@ -395,12 +406,18 @@ function groundcheck()
     gs.jump=false;
     gs.fall=false;
     gs.coyote=15;
+    var tilebelow=playerlook(gs.x, gs.y+1)-1;
 
     // Check for jump pressed
     if (ispressed(KEYUP))
     {
       gs.jump=true;
-      gs.vs=-gs.jumpspeed;
+      
+      // Check for being on a spring, to determine jump height
+      if ((tilebelow==TILESPRINGUP) || (tilebelow==TILESPRINGDOWN))
+        gs.vs=-(gs.springspeed);
+      else
+        gs.vs=-gs.jumpspeed;
     }
   }
   else
