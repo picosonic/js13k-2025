@@ -4,19 +4,24 @@
 const XMAX=320;
 const YMAX=180;
 
-const TILEWIDTH=8;
-const TILEHEIGHT=8;
+const TILEWIDTH=16;
+const TILEHEIGHT=16;
+const TILEWIDTH2=TILEWIDTH/2;
+const TILEHEIGHT2=TILEHEIGHT/2;
 const TILESPERROW=15;
 
 const TILECATWIDTH=20;
 const TILECATHEIGHT=16;
 const TILESCATPERROW=6;
 
-const BGCOLOUR="rgb(112,128,144)";
+const BGCOLOUR="rgb(82,98,114)";
 
 const ANIMSPEED=2;
-const MOVESPEED=1;
-const JUMPSPEED=3;
+const WALKSPEED=2;
+const RUNSPEED=3;
+const JUMPSPEED=6;
+const CATSAT=60; // time after stopping until sitting
+const RUNTIME=120; // time after starting to walk before running
 
 const KEYNONE=0;
 const KEYLEFT=1;
@@ -25,6 +30,7 @@ const KEYRIGHT=4;
 const KEYDOWN=8;
 const KEYACTION=16;
 
+const TILEMAGNET=89;
 const TILECAT=131;
 
 // Game state
@@ -63,13 +69,21 @@ var gs={
   jump:false, // jumping
   fall:false, // falling
   dir:0, // direction (-1=left, 0=none, 1=right)
-  speed:MOVESPEED, // walking speed
+  speed:WALKSPEED, // walking speed
   jumpspeed:JUMPSPEED, // jumping speed
   coyote:0, // coyote timer (time after leaving ground where you can still jump)
+  pausetimer:0, // countdown timer after stopping movement before sitting down
+  runtimer:0, // countdown timer after walking starts before running
   flip:false, // if player is horizontally flipped
+  tileid:TILECAT, // current player tile
   frameindex:0, // current animation frame
   walkanim:[6, 7, 8, 9, 10, 11],
   runanim:[12, 13, 14, 15, 16, 17],
+  jumprise:12, // rising jump frame
+  jumpfall:13, // falling jump frame
+  magnetised:false,
+  zipleft:0, // left edge of zipwire
+  zipright:0, // right edge of zipwire
 
   // Level attributes
   level:0, // Level number (0 based)
@@ -135,7 +149,7 @@ function drawtile(tileid, x, y)
       ((y-gs.yoffset)>YMAX))   // clip bottom
     return;
 
-  gs.ctx.drawImage(gs.tilemap, (tileid*TILEWIDTH) % (TILESPERROW*TILEWIDTH), Math.floor((tileid*TILEWIDTH) / (TILESPERROW*TILEWIDTH))*TILEHEIGHT, TILEWIDTH, TILEHEIGHT, (x-gs.xoffset)*2, (y-gs.yoffset)*2, TILEWIDTH*2, TILEHEIGHT*2);
+  gs.ctx.drawImage(gs.tilemap, (tileid*TILEWIDTH2) % (TILESPERROW*TILEWIDTH2), Math.floor((tileid*TILEWIDTH2) / (TILESPERROW*TILEWIDTH2))*TILEHEIGHT2, TILEWIDTH2, TILEHEIGHT2, x-gs.xoffset, y-gs.yoffset, TILEWIDTH, TILEHEIGHT);
 }
 
 // Draw sprite
@@ -152,11 +166,11 @@ function drawsprite(sprite)
     return;
 
   if (sprite.flip)
-    gs.ctx.drawImage(gs.tilemapflip, ((TILESPERROW*TILEWIDTH)-((sprite.id*TILEWIDTH) % (TILESPERROW*TILEWIDTH)))-TILEWIDTH, Math.floor((sprite.id*TILEWIDTH) / (TILESPERROW*TILEWIDTH))*TILEHEIGHT, TILEWIDTH, TILEHEIGHT,
-      (Math.floor(sprite.x)-gs.xoffset)*2, (Math.floor(sprite.y)-gs.yoffset)*2, TILEWIDTH*2, TILEHEIGHT*2);
+    gs.ctx.drawImage(gs.tilemapflip, ((TILESPERROW*TILEWIDTH2)-((sprite.id*TILEWIDTH2) % (TILESPERROW*TILEWIDTH2)))-TILEWIDTH2, Math.floor((sprite.id*TILEWIDTH2) / (TILESPERROW*TILEWIDTH2))*TILEHEIGHT2, TILEWIDTH2, TILEHEIGHT2,
+      Math.floor(sprite.x)-gs.xoffset, Math.floor(sprite.y)-gs.yoffset, TILEWIDTH, TILEHEIGHT);
   else
-    gs.ctx.drawImage(gs.tilemap, (sprite.id*TILEWIDTH) % (TILESPERROW*TILEWIDTH), Math.floor((sprite.id*TILEWIDTH) / (TILESPERROW*TILEWIDTH))*TILEHEIGHT, TILEWIDTH, TILEHEIGHT,
-      (Math.floor(sprite.x)-gs.xoffset)*2, (Math.floor(sprite.y)-gs.yoffset)*2, TILEWIDTH*2, TILEHEIGHT*2);
+    gs.ctx.drawImage(gs.tilemap, (sprite.id*TILEWIDTH2) % (TILESPERROW*TILEWIDTH2), Math.floor((sprite.id*TILEWIDTH2) / (TILESPERROW*TILEWIDTH2))*TILEHEIGHT2, TILEWIDTH2, TILEHEIGHT2,
+      Math.floor(sprite.x)-gs.xoffset, Math.floor(sprite.y)-gs.yoffset, TILEWIDTH, TILEHEIGHT);
 }
 
 
@@ -165,9 +179,9 @@ function drawcatsprite(tileid, x, y)
 {
   if (gs.flip==1)
     gs.ctx.drawImage(gs.tilemapcatflip, ((TILESCATPERROW*TILECATWIDTH)-((tileid*TILECATWIDTH) % (TILESCATPERROW*TILECATWIDTH)))-TILECATWIDTH, Math.floor((tileid*TILECATWIDTH) / (TILESCATPERROW*TILECATWIDTH))*TILECATHEIGHT, TILECATWIDTH, TILECATHEIGHT,
-      Math.floor(x)-(gs.xoffset*2), Math.floor(y)-(gs.yoffset*2), TILECATWIDTH, TILECATHEIGHT);
+      Math.floor(x)-gs.xoffset, Math.floor(y)-gs.yoffset, TILECATWIDTH, TILECATHEIGHT);
   else
-    gs.ctx.drawImage(gs.tilemapcat, (tileid*TILECATWIDTH) % (TILESCATPERROW*TILECATWIDTH), Math.floor((tileid*TILECATWIDTH) / (TILESCATPERROW*TILECATWIDTH))*TILECATHEIGHT, TILECATWIDTH, TILECATHEIGHT, Math.floor(x)-(gs.xoffset*2), Math.floor(y)-(gs.yoffset*2), TILECATWIDTH, TILECATHEIGHT);
+    gs.ctx.drawImage(gs.tilemapcat, (tileid*TILECATWIDTH) % (TILESCATPERROW*TILECATWIDTH), Math.floor((tileid*TILECATWIDTH) / (TILESCATPERROW*TILECATWIDTH))*TILECATHEIGHT, TILECATWIDTH, TILECATHEIGHT, Math.floor(x)-gs.xoffset, Math.floor(y)-gs.yoffset, TILECATWIDTH, TILECATHEIGHT);
 }
 
 // Load level
@@ -201,6 +215,21 @@ function loadlevel(level)
 
         switch (tile-1)
         {
+          case TILEMAGNET: // Magnet for zipline
+            // Default to magnet linked to itself
+            obj.zx=obj.x;
+
+            // Look for other magnet at same height
+            for (var zx=0; zx<gs.width; zx++)
+            {
+              var ztile=parseInt(levels[gs.level].chars[(y*gs.width)+zx]||0, 10);
+
+              if (((ztile-1)==TILEMAGNET) && (zx!=x))
+                obj.zx=(zx*TILEWIDTH); // Found other magnet
+            }
+            gs.chars.push(obj);
+            break;
+
           case TILECAT: // Player
             gs.x=obj.x; // Set current position
             gs.y=obj.y;
@@ -214,6 +243,10 @@ function loadlevel(level)
             gs.fall=false;
             gs.dir=0;
             gs.flip=false;
+            gs.coyote=0;
+            gs.pausetimer=0;
+            gs.runtimer=0;
+            gs.speed=WALKSPEED;
             break;
 
           default:
@@ -250,6 +283,32 @@ function drawchars()
     drawsprite(gs.chars[id]);
 }
 
+function drawziplines()
+{
+  for (var id=0; id<gs.chars.length; id++)
+  {
+    if (gs.chars[id].id==TILEMAGNET)
+    {
+      // Check it's the furthest to the left of the pair
+      if (gs.chars[id].x<=gs.chars[id].zx)
+      {
+        // Draw this zipline
+        gs.ctx.fillStyle="rgb(0,0,0)";
+        gs.ctx.lineWidth=1;
+        gs.ctx.setLineDash([1,1]);
+        gs.ctx.beginPath();
+        gs.ctx.moveTo(gs.chars[id].x+(TILEWIDTH/2)-gs.xoffset, gs.chars[id].y+1-gs.yoffset);
+        gs.ctx.lineTo(gs.chars[id].zx+(TILEWIDTH/2)-gs.xoffset, gs.chars[id].y+1-gs.yoffset);
+        gs.ctx.stroke();
+        
+        // Draw the magnet above the cat
+        if (gs.magnetised)
+          drawsprite({id:TILEMAGNET, x:gs.x, y:gs.y-(TILEHEIGHT/2), flip:gs.flip});
+      }
+    }
+  }
+}
+
 // Check if player has left the map
 function offmapcheck()
 {
@@ -257,6 +316,10 @@ function offmapcheck()
   {
     gs.x=gs.sx;
     gs.y=gs.sy;
+    gs.speed=WALKSPEED;
+    gs.coyote=0;
+    gs.pausetimer=0;
+    gs.runtimer=0;
 
     scrolltoplayer(false);
   }
@@ -312,6 +375,18 @@ function groundcheck()
   // Check for coyote time
   if (gs.coyote>0)
     gs.coyote--;
+    
+  // Check for pause time
+  if (gs.pausetimer>0)
+    gs.pausetimer--;
+
+  // Check for run time
+  if (gs.runtimer>0)
+  {
+    gs.runtimer--;
+    
+    if (gs.runtimer==0) gs.speed=RUNSPEED;
+  }
 
   // Check we are on the ground
   if (playercollide(gs.x, gs.y+1))
@@ -330,6 +405,14 @@ function groundcheck()
   }
   else
   {
+    // Check for demagnetisation
+    if ((gs.magnetised) && (ispressed(KEYDOWN)))
+    {
+      gs.magnetised=false;
+      gs.vs=1;
+      gs.coyote=0;
+    }
+
     // Check for jump pressed when coyote time not expired
     if ((ispressed(KEYUP)) && (gs.jump==false) && (gs.coyote>0))
     {
@@ -380,6 +463,8 @@ function collisioncheck()
 
     // Stop horizontal movement
     gs.hs=0;
+    gs.speed=WALKSPEED;
+    gs.runtimer=0;
   }
   gs.x+=Math.floor(gs.hs);
 
@@ -396,8 +481,20 @@ function collisioncheck()
 
     // Stop vertical movement
     gs.vs=0;
+    
+    // If mid jump, start descent
+    if (gs.jump)
+    {
+      gs.jump=false;
+      gs.fall=true;
+
+      gs.vs+=gs.gravity;
+    }
   }
-  gs.y+=Math.floor(gs.vs);
+  
+  // Apply gravity when not magnetised
+  if (!gs.magnetised)
+    gs.y+=Math.floor(gs.vs);
 }
 
 // If no input detected, slow the player using friction
@@ -418,6 +515,9 @@ function standcheck()
       {
         gs.hs=0;
         gs.dir=0;
+        gs.pausetimer=CATSAT;
+        gs.speed=WALKSPEED;
+        gs.runtimer=0;
       }
     }
 
@@ -432,6 +532,9 @@ function standcheck()
       {
         gs.hs=0;
         gs.dir=0;
+        gs.pausetimer=CATSAT;
+        gs.speed=WALKSPEED;
+        gs.runtimer=0;
       }
     }
   }
@@ -442,9 +545,12 @@ function updateanimation()
 {
   if (gs.anim==0)
   {
-    gs.frameindex++;
-    if (gs.frameindex>=gs.runanim.length)
-      gs.frameindex=0;
+    if (gs.dir!=0)
+    {
+      gs.frameindex++;
+      if (gs.frameindex>=gs.runanim.length)
+        gs.frameindex=0;
+    }
 
     gs.anim=ANIMSPEED;
   }
@@ -477,6 +583,7 @@ function updatemovements()
     if ((ispressed(KEYLEFT)) && (!ispressed(KEYRIGHT)))
     {
       gs.hs=-gs.speed;
+      if (gs.runtimer==0) gs.runtimer=RUNTIME;
       gs.dir=-1;
       gs.flip=false;
     }
@@ -485,8 +592,29 @@ function updatemovements()
     if ((ispressed(KEYRIGHT)) && (!ispressed(KEYLEFT)))
     {
       gs.hs=gs.speed;
+      if (gs.runtimer==0) gs.runtimer=RUNTIME;
       gs.dir=1;
       gs.flip=true;
+    }
+    
+    // Pressing action key whilst moving on the ground starts running
+    if ((ispressed(KEYACTION)) && (gs.hs!=0) && (!gs.jump) && (!gs.fall))
+      gs.speed=RUNSPEED;
+  }
+  
+  // Handle zipwires
+  if (gs.magnetised)
+  {
+    if (gs.x>gs.zipright)
+    {
+      gs.hs=0;
+      gs.x=gs.zipright;
+    }
+    
+    if (gs.x<gs.zipleft)
+    {
+      gs.hs=0;
+      gs.x=gs.zipleft;
     }
   }
 
@@ -494,11 +622,52 @@ function updatemovements()
   updateanimation();
 }
 
+// Check for collision between player and character/collectable
+function updateplayerchar()
+{
+  // Generate player hitbox
+  var px=gs.x+(TILEWIDTH/3);
+  var py=gs.y+((TILEHEIGHT/5)*2);
+  var pw=(TILEWIDTH/3);
+  var ph=(TILEHEIGHT/5)*3;
+  var id=0;
+  
+  for (id=0; id<gs.chars.length; id++)
+  {
+    // Check for collision with this char
+    if (overlap(px, py, pw, ph, gs.chars[id].x, gs.chars[id].y, TILEWIDTH, TILEHEIGHT))
+    {
+      switch (gs.chars[id].id)
+      {
+        case TILEMAGNET:
+          if ((gs.chars[id].zx!=gs.chars[id].x) && (gs.jump))
+          {
+            gs.jump=false;
+            gs.fall=false;
+            gs.magnetised=true;
+            gs.zipleft=Math.min(gs.chars[id].x, gs.chars[id].zx);
+            gs.zipright=Math.max(gs.chars[id].x, gs.chars[id].zx);
+            gs.vs=0; // Stop vertical movement
+            gs.x=gs.chars[id].x;
+            gs.y=gs.chars[id].y+(TILEHEIGHT/2);
+          }
+          break;
+
+        default:
+          break;
+      }
+    }
+  }
+}
+
 // Update game state, called once per frame
 function update()
 {
   // Apply keystate/physics to player
   updatemovements();
+  
+  // Check for player/character/collectable collisions
+  updateplayerchar();
 }
 
 // Scroll level to player
@@ -510,8 +679,8 @@ function scrolltoplayer(dampened)
   var maxyoffs=((gs.height*TILEHEIGHT)-YMAX);
 
   // Work out where x and y offsets should be
-  var newxoffs=Math.floor(((gs.x*2)-xmiddle)/2);
-  var newyoffs=Math.floor(((gs.y*2)-ymiddle)/2);
+  var newxoffs=gs.x-xmiddle;
+  var newyoffs=gs.y-ymiddle;
 
   // Restrict right side to edge of level
   if (newxoffs>maxxoffs) newxoffs=maxxoffs;
@@ -526,14 +695,11 @@ function scrolltoplayer(dampened)
   {
     if (dampened)
     {
-      var xdelta=0.5;
+      var xdelta=1;
 
-      if (
-        (Math.abs(gs.xoffset-newxoffs)>(XMAX/5)) ||
-        (newxoffs==0) ||
-        (newxoffs==maxxoffs)) xdelta=1;
+      if (Math.abs(gs.xoffset-newxoffs)>(XMAX/5)) xdelta=Math.abs(Math.floor(gs.hs));
 
-      gs.xoffset+=Math.floor(newxoffs>gs.xoffset?xdelta:-xdelta);
+      gs.xoffset+=newxoffs>gs.xoffset?xdelta:-xdelta;
     }
     else
       gs.xoffset=newxoffs;
@@ -544,14 +710,11 @@ function scrolltoplayer(dampened)
   {
     if (dampened)
     {
-      var ydelta=0.5;
+      var ydelta=1;
 
-      if (
-        (Math.abs(gs.yoffset-newyoffs)>(YMAX/5)) ||
-        (newyoffs==0) ||
-        (newyoffs==maxyoffs)) ydelta=1;
+      if (Math.abs(gs.yoffset-newyoffs)>(YMAX/5)) ydelta=Math.abs(Math.floor(gs.vs));
 
-      gs.yoffset+=Math.floor(newyoffs>gs.yoffset?ydelta:-ydelta);
+      gs.yoffset+=newyoffs>gs.yoffset?ydelta:-ydelta;
     }
     else
       gs.yoffset=newyoffs;
@@ -573,9 +736,22 @@ function redraw()
 
   // Draw the characters
   drawchars();
+  
+  // Draw ziplines
+  drawziplines();
 
   // Draw the player
-  drawcatsprite(gs.dir==0?3:gs.runanim[gs.frameindex], gs.x*2, gs.y*2);
+  if (gs.magnetised)
+    gs.tileid=1;
+  else if (gs.jump)
+    gs.tileid=gs.jumprise;
+  else if (gs.fall)
+    gs.tileid=gs.jumpfall;
+  else
+    gs.tileid=((gs.dir==0) && (gs.pausetimer==0))?3:((gs.speed==RUNSPEED)?gs.runanim[gs.frameindex]:gs.walkanim[gs.frameindex]);
+
+  //drawsprite({id:gs.tileid, x:gs.x, y:gs.y, flip:gs.flip});
+  drawcatsprite(gs.tileid, gs.x, gs.y);
 }
 
 // Request animation frame callback

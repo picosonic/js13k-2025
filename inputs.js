@@ -25,9 +25,9 @@ function updatekeystate(e, dir)
     case 65: // A
     case 90: // Z
       if (dir==1)
-        gs.keystate|=1;
+        gs.keystate|=KEYLEFT;
       else
-        gs.keystate&=~1;
+        gs.keystate&=~KEYLEFT;
 
       e.preventDefault();
       break;
@@ -36,9 +36,9 @@ function updatekeystate(e, dir)
     case 87: // W
     case 59: // semicolon
       if (dir==1)
-        gs.keystate|=2;
+        gs.keystate|=KEYUP;
       else
-        gs.keystate&=~2;
+        gs.keystate&=~KEYUP;
 
       e.preventDefault();
       break;
@@ -47,9 +47,9 @@ function updatekeystate(e, dir)
     case 68: // D
     case 88: // X
       if (dir==1)
-        gs.keystate|=4;
+        gs.keystate|=KEYRIGHT;
       else
-        gs.keystate&=~4;
+        gs.keystate&=~KEYRIGHT;
 
       e.preventDefault();
       break;
@@ -58,9 +58,9 @@ function updatekeystate(e, dir)
     case 83: // S
     case 190: // dot
       if (dir==1)
-        gs.keystate|=8;
+        gs.keystate|=KEYDOWN;
       else
-        gs.keystate&=~8;
+        gs.keystate&=~KEYDOWN;
 
       e.preventDefault();
       break;
@@ -68,9 +68,9 @@ function updatekeystate(e, dir)
     case 13: // enter
     case 32: // space
       if (dir==1)
-        gs.keystate|=16;
+        gs.keystate|=KEYACTION;
       else
-        gs.keystate&=~16;
+        gs.keystate&=~KEYACTION;
 
       e.preventDefault();
       break;
