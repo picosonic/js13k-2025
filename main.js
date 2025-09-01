@@ -281,6 +281,11 @@ function loadlevel(level)
             gs.chars.push(obj);
             break;
 
+          case TILEELECTRIC:
+            obj.anim=2; // Slow animation
+            gs.chars.push(obj);
+            break;
+
           case TILEDRONE:
           case TILEDRONE2:
             obj.dx=-1; // Null destination
@@ -668,6 +673,15 @@ function updateanimation()
     {
       switch (gs.chars[id].id)
       {
+        case TILEELECTRIC:
+          gs.chars[id].anim--;
+          if (gs.chars[id].anim==0)
+          {
+            gs.chars[id].anim=2;
+            gs.chars[id].flip=(!gs.chars[id].flip);
+          }
+          break;
+
         case TILEDRONE:
         case TILEDRONE2:
           gs.chars[id].id=(gs.chars[id].id==TILEDRONE?TILEDRONE2:TILEDRONE);
