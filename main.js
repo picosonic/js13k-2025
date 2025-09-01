@@ -334,7 +334,7 @@ function drawlevel()
       switch (tile-1)
       {
         case TILESPRINGUP:
-          if (overlap(gs.x, gs.y+(TILECATHEIGHT), TILECATWIDTH, TILECATHEIGHT, x*TILEWIDTH, y*TILEHEIGHT, TILEWIDTH, TILEHEIGHT))
+          if ((overlap(gs.x, gs.y+(TILECATHEIGHT), TILECATWIDTH, TILECATHEIGHT, x*TILEWIDTH, y*TILEHEIGHT, TILEWIDTH, TILEHEIGHT)) && (playerlook(gs.x, gs.y+1)-1==TILESPRINGUP))
             drawtile(TILESPRINGDOWN, x*TILEWIDTH, y*TILEHEIGHT);
           else
             drawtile(TILESPRINGUP, x*TILEWIDTH, y*TILEHEIGHT);
