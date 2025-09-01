@@ -63,3 +63,33 @@ Added ability to jump
 Expanded test level to test jumps
 
 Added level scrolling
+
+16th August
+-----------
+Moved input handling to separate module
+
+17th August
+-----------
+Added character handling, basically non-solid tiles which you can either go past or interact with
+
+19th August
+-----------
+Added zipline, idle sitting, running, collision
+
+Test jumping on spring mechanic
+
+1st September
+-------------
+After a long break for a family holiday with unfortunately no dev, I've got back into things
+
+Added pathfinder library from a previous project to allow characters to find their way around the map without bumping into solid things
+
+Added cat being electrocuted collision detection, electricty animation and cat sprite
+
+Added concept of 9 lives, which is shown on UI, although for now these are shown as 9 halves
+
+Made the UI elements (hearts/stars) semi-transparent so that you can see what's underneath
+
+Tidy-up by using constant IDs where possible rather than numbers
+
+Made drone character animate and follow player using pathfinder
