@@ -21,6 +21,7 @@ const WALKSPEED=2;
 const RUNSPEED=3;
 const JUMPSPEED=6; // jump height
 const SPRINGSPEED=8; // jump height on a spring
+const ELECTROTIME=30; // timer while electro
 const CATSAT=60; // time after stopping until sitting
 const RUNTIME=120; // time after starting to walk before running
 const MAXLIVES=(9/2);
@@ -105,6 +106,7 @@ var gs={
   coyote:0, // coyote timer (time after leaving ground where you can still jump)
   pausetimer:0, // countdown timer after stopping movement before sitting down
   runtimer:0, // countdown timer after walking starts before running
+  electrotimer:0, // countdown timer after being electrocuted
   flip:false, // if player is horizontally flipped
   tileid:TILECAT, // current player tile
   frameindex:0, // current animation frame
@@ -309,6 +311,7 @@ function loadlevel(level)
             gs.flip=false;
             gs.coyote=0;
             gs.pausetimer=0;
+            gs.electrotimer=0;
             gs.runtimer=0;
             gs.speed=WALKSPEED;
             break;
@@ -377,7 +380,7 @@ function drawziplines()
         gs.ctx.moveTo(gs.chars[id].x+(TILEWIDTH/2)-gs.xoffset, gs.chars[id].y+1-gs.yoffset);
         gs.ctx.lineTo(gs.chars[id].zx+(TILEWIDTH/2)-gs.xoffset, gs.chars[id].y+1-gs.yoffset);
         gs.ctx.stroke();
-        
+
         // Draw the magnet above the cat
         if (gs.magnetised)
           drawsprite({id:TILEMAGNET, x:gs.x, y:gs.y-(TILEHEIGHT/2), flip:gs.flip});
@@ -390,12 +393,12 @@ function drawlives()
 {
   const whole=Math.floor(gs.lives);
   const empty=Math.floor(MAXLIVES-whole);
-  
+
   for (var i=0; i<Math.ceil(MAXLIVES); i++)
   {
     var px=((i+0.5)*TILEWIDTH)+gs.xoffset;
     var py=(TILEHEIGHT/2)+gs.yoffset;
-    
+
     if (i<whole)
       drawsprite({id:TILEHEART, x:px, y:py, flip:false});
 
@@ -419,8 +422,9 @@ function offmapcheck()
     gs.speed=WALKSPEED;
     gs.coyote=0;
     gs.pausetimer=0;
+    gs.electrotimer=0;
     gs.runtimer=0;
-    
+
     if (gs.lives>0)
       gs.lives-=0.5;
 
@@ -468,7 +472,7 @@ function collide(px, py, pw, ph)
 
 // Collision check with player hitbox, return tile
 function playerlook(x, y)
-{         
+{
   return collide(x+(TILEWIDTH/3), y+((TILEHEIGHT/5)*2), TILEWIDTH/3, (TILEHEIGHT/5)*3);
 }
 
@@ -484,16 +488,20 @@ function groundcheck()
   // Check for coyote time
   if (gs.coyote>0)
     gs.coyote--;
-    
+
   // Check for pause time
   if (gs.pausetimer>0)
     gs.pausetimer--;
+
+  // Check for electro time
+  if (gs.electrotimer>0)
+    gs.electrotimer--;
 
   // Check for run time
   if (gs.runtimer>0)
   {
     gs.runtimer--;
-    
+
     if (gs.runtimer==0) gs.speed=RUNSPEED;
   }
 
@@ -510,7 +518,7 @@ function groundcheck()
     if (ispressed(KEYUP))
     {
       gs.jump=true;
-      
+
       // Check for being on a spring, to determine jump height
       if ((tilebelow==TILESPRINGUP) || (tilebelow==TILESPRINGDOWN))
         gs.vs=-(gs.springspeed);
@@ -596,7 +604,7 @@ function collisioncheck()
 
     // Stop vertical movement
     gs.vs=0;
-    
+
     // If mid jump, start descent
     if (gs.jump)
     {
@@ -606,7 +614,7 @@ function collisioncheck()
       gs.vs+=gs.gravity;
     }
   }
-  
+
   // Apply gravity when not magnetised
   if (!gs.magnetised)
     gs.y+=Math.floor(gs.vs);
@@ -736,12 +744,12 @@ function updatemovements()
       gs.dir=1;
       gs.flip=true;
     }
-    
+
     // Pressing action key whilst moving on the ground starts running
     if ((ispressed(KEYACTION)) && (gs.hs!=0) && (!gs.jump) && (!gs.fall))
       gs.speed=RUNSPEED;
   }
-  
+
   // Handle zipwires
   if (gs.magnetised)
   {
@@ -750,7 +758,7 @@ function updatemovements()
       gs.hs=0;
       gs.x=gs.zipright;
     }
-    
+
     if (gs.x<gs.zipleft)
     {
       gs.hs=0;
@@ -771,7 +779,7 @@ function updateplayerchar()
   var pw=(TILEWIDTH/3);
   var ph=(TILEHEIGHT/5)*3;
   var id=0;
-  
+
   for (id=0; id<gs.chars.length; id++)
   {
     // Check for collision with this char
@@ -790,6 +798,17 @@ function updateplayerchar()
             gs.vs=0; // Stop vertical movement
             gs.x=gs.chars[id].x;
             gs.y=gs.chars[id].y+(TILEHEIGHT/2);
+          }
+          break;
+
+        case TILEELECTRIC:
+          if (gs.electrotimer==0)
+          {
+            gs.jump=false;
+            gs.fall=false;
+            gs.electrotimer=ELECTROTIME;
+            gs.vs=0-(gs.vs*2);
+            gs.hs=0-(gs.hs*2);
           }
           break;
 
@@ -878,7 +897,7 @@ function update()
 {
   // Apply keystate/physics to player
   updatemovements();
-  
+
   // Update other character movements / AI
   updatecharAI();
 
@@ -952,7 +971,7 @@ function redraw()
 
   // Draw the characters
   drawchars();
-  
+
   // Draw ziplines
   drawziplines();
 
@@ -963,11 +982,14 @@ function redraw()
     gs.tileid=CATJUMP;
   else if (gs.fall)
     gs.tileid=CATFALL;
+  else if (gs.electrotimer>0)
+    gs.tileid=CATELECTRO;
   else
     gs.tileid=((gs.dir==0) && (gs.pausetimer==0))?3:((gs.speed==RUNSPEED)?gs.runanim[gs.frameindex]:gs.walkanim[gs.frameindex]);
 
-  drawcatsprite(gs.tileid, gs.x, playerlook(gs.x, gs.y+1)-1==TILESPRINGUP?gs.y+8:gs.y);
-  
+  if ((gs.electrotimer==0) || ((gs.electrotimer%7)<=4))
+    drawcatsprite(gs.tileid, gs.x, playerlook(gs.x, gs.y+1)-1==TILESPRINGUP?gs.y+8:gs.y);
+
   // Draw hearts left
   drawlives();
 }
