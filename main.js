@@ -32,10 +32,32 @@ const KEYRIGHT=4;
 const KEYDOWN=8;
 const KEYACTION=16;
 
+// Cat sprite ids
+const CATMAGNET=1;
+const CATELECTRO=5;
+const CATWALK1=6;
+const CATWALK2=7;
+const CATWALK3=8;
+const CATWALK4=9;
+const CATWALK5=10;
+const CATWALK6=11;
+const CATRUN1=12;
+const CATRUN2=13;
+const CATRUN3=14;
+const CATRUN4=15;
+const CATRUN5=16;
+const CATRUN6=17;
+const CATJUMP=CATRUN1;
+const CATFALL=CATRUN2;
+
+// Tile ids
 const TILENONE=0;
 const TILESPRINGUP=30;
 const TILESPRINGDOWN=15;
+const TILEELECTRIC=83;
 const TILEMAGNET=89;
+const TILEDRONE=112;
+const TILEDRONE2=113;
 const TILECAT=131;
 const TILEHEART=132;
 const TILEHALFHEART=133;
@@ -86,10 +108,8 @@ var gs={
   flip:false, // if player is horizontally flipped
   tileid:TILECAT, // current player tile
   frameindex:0, // current animation frame
-  walkanim:[6, 7, 8, 9, 10, 11],
-  runanim:[12, 13, 14, 15, 16, 17],
-  jumprise:12, // rising jump frame
-  jumpfall:13, // falling jump frame
+  walkanim:[CATWALK1, CATWALK2, CATWALK3, CATWALK4, CATWALK5, CATWALK6],
+  runanim:[CATRUN1, CATRUN2, CATRUN3, CATRUN4, CATRUN5, CATRUN6],
   magnetised:false,
   zipleft:0, // left edge of zipwire
   zipright:0, // right edge of zipwire
@@ -605,6 +625,7 @@ function updateanimation()
 {
   if (gs.anim==0)
   {
+    // Player animation
     if (gs.dir!=0)
     {
       gs.frameindex++;
@@ -802,15 +823,14 @@ function redraw()
 
   // Draw the player
   if (gs.magnetised)
-    gs.tileid=1;
+    gs.tileid=CATMAGNET;
   else if (gs.jump)
-    gs.tileid=gs.jumprise;
+    gs.tileid=CATJUMP;
   else if (gs.fall)
-    gs.tileid=gs.jumpfall;
+    gs.tileid=CATFALL;
   else
     gs.tileid=((gs.dir==0) && (gs.pausetimer==0))?3:((gs.speed==RUNSPEED)?gs.runanim[gs.frameindex]:gs.walkanim[gs.frameindex]);
 
-  //drawsprite({id:gs.tileid, x:gs.x, y:gs.y, flip:gs.flip});
   drawcatsprite(gs.tileid, gs.x, playerlook(gs.x, gs.y+1)-1==TILESPRINGUP?gs.y+8:gs.y);
   
   // Draw hearts left
