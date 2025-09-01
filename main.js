@@ -214,6 +214,27 @@ function drawcatsprite(tileid, x, y)
     gs.ctx.drawImage(gs.tilemapcat, (tileid*TILECATWIDTH) % (TILESCATPERROW*TILECATWIDTH), Math.floor((tileid*TILECATWIDTH) / (TILESCATPERROW*TILECATWIDTH))*TILECATHEIGHT, TILECATWIDTH, TILECATHEIGHT, Math.floor(x)-gs.xoffset, Math.floor(y)-gs.yoffset, TILECATWIDTH, TILECATHEIGHT);
 }
 
+// Sort the chars so sprites are last (so they appear in front of non-solid tiles)
+function sortChars(a, b)
+{
+  const sprites=[TILEDRONE, TILEDRONE2];
+
+  if (a.id!=b.id) // extra processing if they are different ids
+  {
+    var aspr=(sprites.includes(a.id)); // see if a is a sprite
+    var bspr=(sprites.includes(b.id)); // see if b is a sprite
+
+    if (aspr==bspr) return 0; // both sprites, so don't swap
+
+    if (aspr)
+      return 1; // sort a after b
+    else
+      return -1; // sort a before b
+  }
+
+  return 0; // same id
+}
+
 // Load level
 function loadlevel(level)
 {
@@ -260,6 +281,14 @@ function loadlevel(level)
             gs.chars.push(obj);
             break;
 
+          case TILEDRONE:
+          case TILEDRONE2:
+            obj.dx=-1; // Null destination
+            obj.dy=-1;
+            obj.path=[]; // Empty path
+            gs.chars.push(obj);
+            break;
+
           case TILECAT: // Player
             gs.x=obj.x; // Set current position
             gs.y=obj.y;
@@ -287,7 +316,8 @@ function loadlevel(level)
     }
   }
 
-  // TODO Sort chars such sprites are at the end (so are drawn last, i.e on top)
+  // Sort chars such sprites are at the end (so are drawn last, i.e on top)
+  gs.chars.sort(sortChars);
 
   // Move scroll offset to player with damping disabled
   scrolltoplayer(false);
@@ -633,6 +663,21 @@ function updateanimation()
         gs.frameindex=0;
     }
 
+    // Char animation
+    for (var id=0; id<gs.chars.length; id++)
+    {
+      switch (gs.chars[id].id)
+      {
+        case TILEDRONE:
+        case TILEDRONE2:
+          gs.chars[id].id=(gs.chars[id].id==TILEDRONE?TILEDRONE2:TILEDRONE);
+          break;
+
+        default:
+          break;
+      }
+    }
+
     gs.anim=ANIMSPEED;
   }
   else
@@ -741,12 +786,88 @@ function updateplayerchar()
   }
 }
 
+function updatecharAI()
+{
+  var id=0;
+  var nx=0; // new x position
+  var ny=0; // new y position
+
+  for (id=0; id<gs.chars.length; id++)
+  {
+    switch (gs.chars[id].id)
+    {
+      case TILEDRONE:
+      case TILEDRONE2:
+        // Check if following a path, then move to next node
+        if (gs.chars[id].path.length>0)
+        {
+          var nextx=Math.floor(gs.chars[id].path[0]%gs.width)*TILEWIDTH;
+          var nexty=Math.floor(gs.chars[id].path[0]/gs.width)*TILEHEIGHT;
+          var deltax=Math.abs(nextx-gs.chars[id].x);
+          var deltay=Math.abs(nexty-gs.chars[id].y);
+
+          // Check if we have arrived at the current path node
+          if ((deltax<=(TILEWIDTH/2)) && (deltay<=(TILEHEIGHT/2)))
+          {
+            // We are here, so move on to next path node
+            gs.chars[id].path.shift();
+
+            // Check for being at end of path
+            if (gs.chars[id].path.length==0)
+            {
+              // Set a null destination
+              gs.chars[id].dx=-1;
+              gs.chars[id].dy=-1;
+            }
+          }
+          else
+          {
+            // Move onwards, following path
+            if (deltax!=0)
+            {
+              gs.chars[id].hs=(nextx<gs.chars[id].x)?-1:1; // set horizontal speed
+              gs.chars[id].x+=gs.chars[id].hs; // move horizontally
+              gs.chars[id].flip=(gs.chars[id].hs<0); // left/right flip
+
+              if (gs.chars[id].x<0)
+                gs.chars[id].x=0;
+            }
+
+            if (deltay!=0)
+            {
+              gs.chars[id].y+=(nexty<gs.chars[id].y)?-1:1;
+
+              if (gs.chars[id].y<0)
+                gs.chars[id].y=0;
+            }
+          }
+        }
+        else
+        {
+          // Not following a path
+          gs.chars[id].path=pathfinder(
+                  (Math.floor(gs.chars[id].y/TILEHEIGHT)*gs.width)+Math.floor(gs.chars[id].x/TILEWIDTH)
+                  ,
+                  (Math.floor(gs.y/TILEHEIGHT)*gs.width)+Math.floor(gs.x/TILEWIDTH)
+                  );
+        }
+        break;
+
+      default:
+        break;
+    }
+  }
+}
+
 // Update game state, called once per frame
 function update()
 {
   // Apply keystate/physics to player
   updatemovements();
   
+  // Update other character movements / AI
+  updatecharAI();
+
   // Check for player/character/collectable collisions
   updateplayerchar();
 }
