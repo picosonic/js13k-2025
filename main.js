@@ -23,6 +23,7 @@ const JUMPSPEED=6; // jump height
 const SPRINGSPEED=10; // jump height on a spring
 const CATSAT=60; // time after stopping until sitting
 const RUNTIME=120; // time after starting to walk before running
+const MAXLIVES=(9/2);
 
 const KEYNONE=0;
 const KEYLEFT=1;
@@ -36,6 +37,9 @@ const TILESPRINGUP=30;
 const TILESPRINGDOWN=15;
 const TILEMAGNET=89;
 const TILECAT=131;
+const TILEHEART=132;
+const TILEHALFHEART=133;
+const TILEEMPTYHEART=134;
 
 // Game state
 var gs={
@@ -89,6 +93,7 @@ var gs={
   magnetised:false,
   zipleft:0, // left edge of zipwire
   zipright:0, // right edge of zipwire
+  lives:MAXLIVES,
 
   // Level attributes
   level:0, // Level number (0 based)
@@ -276,7 +281,19 @@ function drawlevel()
     for (var x=0; x<gs.width; x++)
     {
       var tile=parseInt(gs.tiles[(y*gs.width)+x]||1, 10);
-      drawtile(tile-1, x*TILEWIDTH, y*TILEHEIGHT);
+      switch (tile-1)
+      {
+        case TILESPRINGUP:
+          if (overlap(gs.x, gs.y+(TILECATHEIGHT), TILECATWIDTH, TILECATHEIGHT, x*TILEWIDTH, y*TILEHEIGHT, TILEWIDTH, TILEHEIGHT))
+            drawtile(TILESPRINGDOWN, x*TILEWIDTH, y*TILEHEIGHT);
+          else
+            drawtile(TILESPRINGUP, x*TILEWIDTH, y*TILEHEIGHT);
+          break;
+
+        default:
+          drawtile(tile-1, x*TILEWIDTH, y*TILEHEIGHT);
+          break;
+      }
     }
   }
 }
@@ -314,6 +331,29 @@ function drawziplines()
   }
 }
 
+function drawlives()
+{
+  const whole=Math.floor(gs.lives);
+  const empty=Math.floor(MAXLIVES-whole);
+  
+  for (var i=0; i<Math.ceil(MAXLIVES); i++)
+  {
+    var px=((i+0.5)*TILEWIDTH)+gs.xoffset;
+    var py=(TILEHEIGHT/2)+gs.yoffset;
+    
+    if (i<whole)
+      drawsprite({id:TILEHEART, x:px, y:py, flip:false});
+
+    if (i>=whole)
+    {
+      if ((i==whole) && (whole!=gs.lives))
+        drawsprite({id:TILEHALFHEART, x:px, y:py, flip:false});
+      else
+        drawsprite({id:TILEEMPTYHEART, x:px, y:py, flip:false});
+    }
+  }
+}
+
 // Check if player has left the map
 function offmapcheck()
 {
@@ -325,6 +365,9 @@ function offmapcheck()
     gs.coyote=0;
     gs.pausetimer=0;
     gs.runtimer=0;
+    
+    if (gs.lives>0)
+      gs.lives-=0.5;
 
     scrolltoplayer(false);
   }
@@ -370,14 +413,14 @@ function collide(px, py, pw, ph)
 
 // Collision check with player hitbox, return tile
 function playerlook(x, y)
-{
+{         
   return collide(x+(TILEWIDTH/3), y+((TILEHEIGHT/5)*2), TILEWIDTH/3, (TILEHEIGHT/5)*3);
 }
 
 // Collision check with player hitbox, true/flase
 function playercollide(x, y)
 {
-  return (parseInt(playerlook(x, y))>0);
+  return (parseInt(playerlook(x, y), 10)>0);
 }
 
 // Check if player on the ground or falling
@@ -768,7 +811,10 @@ function redraw()
     gs.tileid=((gs.dir==0) && (gs.pausetimer==0))?3:((gs.speed==RUNSPEED)?gs.runanim[gs.frameindex]:gs.walkanim[gs.frameindex]);
 
   //drawsprite({id:gs.tileid, x:gs.x, y:gs.y, flip:gs.flip});
-  drawcatsprite(gs.tileid, gs.x, gs.y);
+  drawcatsprite(gs.tileid, gs.x, playerlook(gs.x, gs.y+1)-1==TILESPRINGUP?gs.y+8:gs.y);
+  
+  // Draw hearts left
+  drawlives();
 }
 
 // Request animation frame callback
