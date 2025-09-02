@@ -521,7 +521,7 @@ function groundcheck()
 
       // Check for being on a spring, to determine jump height
       if ((tilebelow==TILESPRINGUP) || (tilebelow==TILESPRINGDOWN))
-        gs.vs=-(gs.springspeed);
+        gs.vs=-gs.springspeed;
       else
         gs.vs=-gs.jumpspeed;
     }
@@ -617,7 +617,7 @@ function collisioncheck()
 
   // Apply gravity when not magnetised
   if (!gs.magnetised)
-    gs.y+=Math.floor(gs.vs);
+    gs.y=Math.floor(gs.y+gs.vs);
 }
 
 // If no input detected, slow the player using friction
@@ -730,7 +730,9 @@ function updatemovements()
     // Left key
     if ((ispressed(KEYLEFT)) && (!ispressed(KEYRIGHT)))
     {
-      gs.hs=-gs.speed;
+      if (gs.electrotimer==0)
+        gs.hs=-gs.speed;
+
       if (gs.runtimer==0) gs.runtimer=RUNTIME;
       gs.dir=-1;
       gs.flip=false;
@@ -739,7 +741,9 @@ function updatemovements()
     // Right key
     if ((ispressed(KEYRIGHT)) && (!ispressed(KEYLEFT)))
     {
-      gs.hs=gs.speed;
+      if (gs.electrotimer==0)
+        gs.hs=gs.speed;
+
       if (gs.runtimer==0) gs.runtimer=RUNTIME;
       gs.dir=1;
       gs.flip=true;
@@ -802,13 +806,20 @@ function updateplayerchar()
           break;
 
         case TILEELECTRIC:
+          // Don't start electro when already affected by it
           if (gs.electrotimer==0)
           {
-            gs.jump=false;
-            gs.fall=false;
+            clearinputstate();
+
+            gs.runtimer=0;
+
+            gs.magnetised=false;
+
             gs.electrotimer=ELECTROTIME;
-            gs.vs=0-(gs.vs*2);
-            gs.hs=0-(gs.hs*2);
+            gs.jump=true;
+            gs.y-=1;
+            gs.vs=-(gs.jumpspeed/2); // Fly up in the air
+            gs.hs=(gs.hs>0?-(RUNSPEED*2):(RUNSPEED*2)); // Send back in the opposite direction
           }
           break;
 
@@ -978,15 +989,16 @@ function redraw()
   // Draw the player
   if (gs.magnetised)
     gs.tileid=CATMAGNET;
+  else if (gs.electrotimer>0)
+    gs.tileid=CATELECTRO;
   else if (gs.jump)
     gs.tileid=CATJUMP;
   else if (gs.fall)
     gs.tileid=CATFALL;
-  else if (gs.electrotimer>0)
-    gs.tileid=CATELECTRO;
   else
     gs.tileid=((gs.dir==0) && (gs.pausetimer==0))?3:((gs.speed==RUNSPEED)?gs.runanim[gs.frameindex]:gs.walkanim[gs.frameindex]);
 
+  // Flash sprite when electro
   if ((gs.electrotimer==0) || ((gs.electrotimer%7)<=4))
     drawcatsprite(gs.tileid, gs.x, playerlook(gs.x, gs.y+1)-1==TILESPRINGUP?gs.y+8:gs.y);
 
