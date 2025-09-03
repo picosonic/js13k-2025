@@ -93,3 +93,7 @@ Made the UI elements (hearts/stars) semi-transparent so that you can see what's 
 Tidy-up by using constant IDs where possible rather than numbers
 
 Made drone character animate and follow player using pathfinder
+
+2nd September
+-------------
+Improved electro interaction by making friction apply all the time
