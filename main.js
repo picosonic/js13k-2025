@@ -55,6 +55,7 @@ const CATFALL=CATRUN2;
 const TILENONE=0;
 const TILESPRINGUP=30;
 const TILESPRINGDOWN=15;
+const TILESPIKES=75;
 const TILEELECTRIC=83;
 const TILEMAGNET=89;
 const TILEDRONE=112;
@@ -797,6 +798,22 @@ function updateplayerchar()
             gs.vs=0; // Stop vertical movement
             gs.x=gs.chars[id].x;
             gs.y=gs.chars[id].y+(TILEHEIGHT/2);
+          }
+          break;
+
+        case TILESPIKES:
+          if (gs.fall)
+          {
+            clearinputstate();
+
+            // Lose health
+            if (gs.lives>0)
+              gs.lives-=0.5;
+
+            gs.jump=true;
+            gs.fall=false;
+
+            gs.vs=-(gs.jumpspeed/2); // Fly up in the air
           }
           break;
 
