@@ -56,6 +56,8 @@ const TILENONE=0;
 const TILESPRINGUP=30;
 const TILESPRINGDOWN=15;
 const TILEKEY=66;
+const TILEFLAG=73;
+const TILEPOLE=74;
 const TILESPIKES=75;
 const TILEELECTRIC=83;
 const TILEMAGNET=89;
@@ -65,6 +67,10 @@ const TILECAT=131;
 const TILEHEART=132;
 const TILEHALFHEART=133;
 const TILEEMPTYHEART=134;
+const TILEWATER=135;
+const TILEWATER2=136;
+const TILEWATER3=137;
+const TILEWATER4=138;
 
 // Game state
 var gs={
@@ -266,7 +272,7 @@ function loadlevel(level)
 
       if (tile!=0)
       {
-        var obj={id:(tile-1), x:(x*TILEWIDTH), y:(y*TILEHEIGHT), flip:false, hs:0, vs:0, del:false};
+        var obj={id:(tile-1), x:(x*TILEWIDTH), y:(y*TILEHEIGHT), flip:false, hs:0, vs:0, del:false, ttl:0};
 
         switch (tile-1)
         {
@@ -286,6 +292,11 @@ function loadlevel(level)
             break;
 
           case TILEELECTRIC:
+            obj.anim=2; // Slow animation
+            gs.chars.push(obj);
+            break;
+
+          case TILEWATER:
             obj.anim=2; // Slow animation
             gs.chars.push(obj);
             break;
@@ -692,6 +703,22 @@ function updateanimation()
           gs.chars[id].id=(gs.chars[id].id==TILEDRONE?TILEDRONE2:TILEDRONE);
           break;
 
+        case TILEWATER:
+        case TILEWATER2:
+        case TILEWATER3:
+        case TILEWATER4:
+          gs.chars[id].anim--;
+          if (gs.chars[id].anim==0)
+	  {
+            gs.chars[id].id++;
+
+            gs.chars[id].anim=2;
+
+	    if (gs.chars[id].id>TILEWATER4)
+	      gs.chars[id].id=TILEWATER;
+	  }
+          break;
+
         default:
           break;
       }
@@ -803,10 +830,44 @@ function updateplayerchar()
           break;
 
         case TILEKEY:
-          // Unlock door(s)
+          // TODO Unlock door(s)
 
           // Remove from map
           gs.chars[id].del=true;
+          break;
+
+        case TILEFLAG:
+	  {
+	    for (var id2=0; id2<gs.chars.length; id2++)
+	    {
+              // Remove electro
+	      if (gs.chars[id2].id==TILEELECTRIC)
+	      {
+                gs.chars[id2].ttl=id2;
+                gs.chars[id2].del=true;
+              }
+	    }
+
+            // Switch to pole
+            gs.chars[id].id=TILEPOLE;
+	  }
+          break;
+
+        case TILEWATER:
+        case TILEWATER2:
+        case TILEWATER3:
+        case TILEWATER4:
+          if (gs.fall)
+          {
+            // Lose health
+            if (gs.lives>0)
+              gs.lives-=0.5;
+
+            gs.jump=true;
+            gs.fall=false;
+
+            gs.vs=-(gs.jumpspeed*0.75); // Fly up in the air
+          }
           break;
 
         case TILESPIKES:
@@ -821,7 +882,7 @@ function updateplayerchar()
             gs.jump=true;
             gs.fall=false;
 
-            gs.vs=-(gs.jumpspeed/2); // Fly up in the air
+            gs.vs=-(gs.jumpspeed*0.75); // Fly up in the air
           }
           break;
 
@@ -935,7 +996,13 @@ function updatecharAI()
   while (id--)
   {
     if (gs.chars[id].del)
-      gs.chars.splice(id, 1);
+    {
+      if (gs.chars[id].ttl>0)
+        gs.chars[id].ttl--;
+
+      if (gs.chars[id].ttl==0)
+        gs.chars.splice(id, 1);
+    }
   }
 }
 
