@@ -55,6 +55,7 @@ const CATFALL=CATRUN2;
 const TILENONE=0;
 const TILESPRINGUP=30;
 const TILESPRINGDOWN=15;
+const TILEKEY=66;
 const TILESPIKES=75;
 const TILEELECTRIC=83;
 const TILEMAGNET=89;
@@ -801,6 +802,13 @@ function updateplayerchar()
           }
           break;
 
+        case TILEKEY:
+          // Unlock door(s)
+
+          // Remove from map
+          gs.chars[id].del=true;
+          break;
+
         case TILESPIKES:
           if (gs.fall)
           {
@@ -920,6 +928,14 @@ function updatecharAI()
       default:
         break;
     }
+  }
+
+  // Remove anything marked for deletion
+  id=gs.chars.length;
+  while (id--)
+  {
+    if (gs.chars[id].del)
+      gs.chars.splice(id, 1);
   }
 }
 
