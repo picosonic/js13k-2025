@@ -11,3 +11,8 @@ JS13KGames entry for 2025, theme is "**Black Cat**"
 * [Google closure compiler](https://developers.google.com/closure/compiler/docs/gettingstarted_app) JS minifier
 * [advzip](https://github.com/amadvance/advancecomp) (uses [7-Zip](https://sourceforge.net/projects/sevenzip/files/7-Zip/) deflate to compress further)
 
+# Attribution of assets
+
+_Using some assets from [Kenney.nl "Pico-8 Platformer"](https://kenney.nl/assets/pico-8-platformer) (Creative Commons Zero, CC0 license)_
+
+_Using some assets from [Cat sprites](https://opengameart.org/content/cat-sprites) with no attribution, credit [Shepardskin](https://x.com/Shepardskin)_
