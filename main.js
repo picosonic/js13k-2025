@@ -620,45 +620,40 @@ function collisioncheck()
     gs.y=Math.floor(gs.y+gs.vs);
 }
 
-// If no input detected, slow the player using friction
+// Slow the player using friction
 function standcheck()
 {
-  // When no horizontal movement pressed, slow down by friction
-  if (((!ispressed(KEYLEFT)) && (!ispressed(KEYRIGHT))) ||
-      ((ispressed(KEYLEFT)) && (ispressed(KEYRIGHT))))
+  // Going left
+  if (gs.dir==-1)
   {
-    // Going left
-    if (gs.dir==-1)
+    if (gs.hs<0)
     {
-      if (gs.hs<0)
-      {
-        gs.hs+=gs.friction;
-      }
-      else
-      {
-        gs.hs=0;
-        gs.dir=0;
-        gs.pausetimer=CATSAT;
-        gs.speed=WALKSPEED;
-        gs.runtimer=0;
-      }
+      gs.hs+=gs.friction;
     }
-
-    // Going right
-    if (gs.dir==1)
+    else
     {
-      if (gs.hs>0)
-      {
-        gs.hs-=gs.friction;
-      }
-      else
-      {
-        gs.hs=0;
-        gs.dir=0;
-        gs.pausetimer=CATSAT;
-        gs.speed=WALKSPEED;
-        gs.runtimer=0;
-      }
+      gs.hs=0;
+      gs.dir=0;
+      gs.pausetimer=CATSAT;
+      gs.speed=WALKSPEED;
+      gs.runtimer=0;
+    }
+  }
+
+  // Going right
+  if (gs.dir==1)
+  {
+    if (gs.hs>0)
+    {
+      gs.hs-=gs.friction;
+    }
+    else
+    {
+      gs.hs=0;
+      gs.dir=0;
+      gs.pausetimer=CATSAT;
+      gs.speed=WALKSPEED;
+      gs.runtimer=0;
     }
   }
 }
@@ -806,20 +801,28 @@ function updateplayerchar()
           break;
 
         case TILEELECTRIC:
+          clearinputstate();
+
           // Don't start electro when already affected by it
           if (gs.electrotimer==0)
           {
-            clearinputstate();
+            // Lose health
+            if (gs.lives>0)
+              gs.lives-=0.5;
 
-            gs.runtimer=0;
-
+            // Drop from magnet if on zipline
             gs.magnetised=false;
 
             gs.electrotimer=ELECTROTIME;
+
             gs.jump=true;
-            gs.y-=1;
+            gs.fall=false;
+
+            gs.y-=1; // Make sure we're not touching the ground
             gs.vs=-(gs.jumpspeed/2); // Fly up in the air
-            gs.hs=(gs.hs>0?-(RUNSPEED*2):(RUNSPEED*2)); // Send back in the opposite direction
+
+            if (gs.hs!=0)
+              gs.hs=(gs.hs>0?-(RUNSPEED*8):(RUNSPEED*8)); // Send back in the opposite direction
           }
           break;
 
