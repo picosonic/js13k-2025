@@ -1,0 +1,16 @@
+{
+  "name": "Mochi and the midnight escape",
+  "description": "You play as Mochi during a midnight escape.",
+  "images" :
+  {
+    "image_large": "big_screenshot.png",
+    "image_thumbnail": "small_screenshot.png"
+  },
+  "categories": ["Desktop"],
+  "user" :
+  {
+    "name": "picosonic",
+    "website": "https://picosonic.github.io/js13k-2025/",
+    "twitter": "femtosonic"
+  }
+}
