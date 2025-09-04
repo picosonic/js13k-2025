@@ -25,6 +25,7 @@ const ELECTROTIME=30; // timer while electro
 const CATSAT=60; // time after stopping until sitting
 const RUNTIME=120; // time after starting to walk before running
 const MAXLIVES=(9/2);
+const WATERFLOW=3;
 
 const KEYNONE=0;
 const KEYLEFT=1;
@@ -297,7 +298,10 @@ function loadlevel(level)
             break;
 
           case TILEWATER:
-            obj.anim=2; // Slow animation
+          case TILEWATER2:
+          case TILEWATER3:
+          case TILEWATER4:
+            obj.anim=WATERFLOW; // Slow animation
             gs.chars.push(obj);
             break;
 
@@ -712,7 +716,7 @@ function updateanimation()
 	  {
             gs.chars[id].id++;
 
-            gs.chars[id].anim=2;
+            gs.chars[id].anim=WATERFLOW;
 
 	    if (gs.chars[id].id>TILEWATER4)
 	      gs.chars[id].id=TILEWATER;
