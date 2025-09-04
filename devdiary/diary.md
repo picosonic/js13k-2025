@@ -1,8 +1,8 @@
 # Dev Diary / Postmortem
 
-This is my ninth game jam entry.
+This is my ninth game jam entry
 
-As in my previous years entering the competition, around the time the theme was announced I created a new project template with updated build and minify steps from my entry last year.
+As in my previous years entering the competition, around the time the theme was announced I created a new project template with updated build and minify steps from my entry last year
 
 As soon as the theme was announced I had some thoughts as to what kind of game I wanted to create to fit the theme, here as some of my initial thoughts/notes/ideas ..
 
@@ -34,15 +34,15 @@ Here is a rough diary of progress as posted on [Twitter](https://twitter.com/fem
 
 13th August
 -----------
-Looked into [Black Cat on Wikipedia](https://en.wikipedia.org/wiki/Black_cat), to have a think about possible game ideas. I also let me son know the theme soon after annoucement as he is keen to help me on it this year.
+Looked into [Black Cat on Wikipedia](https://en.wikipedia.org/wiki/Black_cat), to have a think about possible game ideas. I also let me son know the theme soon after annoucement as he is keen to help me on it this year
 
-Padded out the build environment and dev workflow.
+Padded out the build environment and dev workflow
 
 Found a free to use [black cat tilemap](https://opengameart.org/content/cat-sprites) with no attribution, credit [Shepardskin](Shepardskin)
 
-Made background transparent, aligned all the sprites to a 20x16 grid.
+Made background transparent, aligned all the sprites to a 20x16 grid
 
-Mocked up a quick sprite animation test where the cat runs left and right across the screen.
+Mocked up a quick sprite animation test where the cat runs left and right across the screen
 
 14th August
 -----------
@@ -97,3 +97,19 @@ Made drone character animate and follow player using pathfinder
 2nd September
 -------------
 Improved electro interaction by making friction apply all the time
+
+3rd September
+-------------
+Electro can now be turned off using flag points, in a phased way
+
+Spikes are now painful and can't be moved through
+
+Added item collection ability, starting with keys
+
+Added water sprites and processing for water
+
+4th September
+-------------
+Locked doors can now be unlocked using a key
+
+Added function to find nearest char of given types
