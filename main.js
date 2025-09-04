@@ -157,12 +157,21 @@ var gs={
   chars:[],
   anim:ANIMSPEED, // frames until next animation frame
 
+  // Particles
+  particles:[], // an array of particles
+
   // Timeline for animation
   timeline:new timelineobj(), // timeline for general animation
 
   // Debug flag
   debug:false
 };
+
+// Random number generator
+function rng()
+{
+  return Math.random();
+}
 
 // Handle resize events
 function playfieldsize()
@@ -346,6 +355,7 @@ function loadlevel(level)
             gs.runtimer=0;
             gs.speed=WALKSPEED;
             gs.key=0;
+            gs.particles=[];
             break;
 
           default:
@@ -393,6 +403,30 @@ function drawchars()
 {
   for (var id=0; id<gs.chars.length; id++)
     drawsprite(gs.chars[id]);
+}
+
+// Draw single particle
+function drawparticle(particle)
+{
+  var x=particle.x+(particle.t*Math.cos(particle.ang));
+  var y=particle.y+(particle.t*Math.sin(particle.ang));
+
+  // Clip to what's visible
+    if (((Math.floor(x)-gs.xoffset)<0) && // clip left
+    ((Math.floor(x)-gs.xoffset)>XMAX) && // clip right
+    ((Math.floor(y)-gs.yoffset)<0) && // clip top
+    ((Math.floor(y)-gs.yoffset)>YMAX))   // clip bottom
+  return;
+
+  gs.ctx.fillStyle="rgba("+particle.r+","+particle.g+","+particle.b+","+particle.a+")";
+  gs.ctx.fillRect(Math.floor(x)-gs.xoffset, Math.floor(y)-gs.yoffset, particle.s, particle.s);
+}
+
+// Draw particles
+function drawparticles()
+{
+  for (var i=0; i<gs.particles.length; i++)
+    drawparticle(gs.particles[i]);
 }
 
 function drawziplines()
@@ -540,6 +574,10 @@ function groundcheck()
   // Check we are on the ground
   if (playercollide(gs.x, gs.y+1))
   {
+    // If we just hit the ground after falling, create a few particles under foot
+    if (gs.fall==true)
+      generateparticles(gs.x+(TILECATWIDTH/2), gs.y+TILECATHEIGHT, 3, 3, {r:170, g:170, b:170});
+
     gs.vs=0;
     gs.jump=false;
     gs.fall=false;
@@ -749,6 +787,46 @@ function updateanimation()
     gs.anim--;
 }
 
+// Generate some particles around an origin
+function generateparticles(cx, cy, mt, count, rgb)
+{
+  for (var i=0; i<count; i++)
+  {
+    var ang=(Math.floor(rng()*360)); // angle to eminate from
+    var t=Math.floor(rng()*mt); // travel from centre
+    var r=rgb.r||(rng()*255);
+    var g=rgb.g||(rng()*255);
+    var b=rgb.b||(rng()*255);
+
+    gs.particles.push({x:cx, y:cy, ang:ang, t:t, r:r, g:g, b:b, a:1.0, s:(rng()<0.05)?2:1});
+  }
+}
+
+// Do processing for particles
+function particlecheck()
+{
+  var i=0;
+
+  // Process particles
+  for (i=0; i<gs.particles.length; i++)
+  {
+    // Move particle
+    gs.particles[i].t+=0.5;
+    gs.particles[i].y+=(gs.gravity*2);
+
+    // Decay particle
+    gs.particles[i].a-=0.007;
+  }
+
+  // Remove particles which have decayed
+  i=gs.particles.length;
+  while (i--)
+  {
+    if (gs.particles[i].a<=0)
+      gs.particles.splice(i, 1);
+  }
+}
+
 // Update player movements
 function updatemovements()
 {
@@ -766,6 +844,9 @@ function updatemovements()
 
   // If no input detected, slow the player using friction
   standcheck();
+
+  // Check for particle usage
+  particlecheck();
 
   // When a movement key is pressed, adjust players speed and direction
   if ((gs.keystate!=KEYNONE) || (gs.padstate!=KEYNONE))
@@ -847,6 +928,9 @@ function updateplayerchar()
         case TILEKEY:
           gs.key++;
 
+          // Shiny
+	  generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 16, 16, {r:0xff, g:0xff, b:1});
+
           // Remove from map
           gs.chars[id].del=true;
           break;
@@ -907,6 +991,9 @@ function updateplayerchar()
             gs.fall=false;
 
             gs.vs=-(gs.jumpspeed*0.75); // Fly up in the air
+
+            // Splash
+	    generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 16, 16, {r:0x29, g:0xad, b:0xff});
           }
           break;
 
@@ -922,7 +1009,10 @@ function updateplayerchar()
             gs.jump=true;
             gs.fall=false;
 
-            gs.vs=-(gs.jumpspeed*0.75); // Fly up in the air
+            gs.vs=-(gs.jumpspeed*0.80); // Fly up in the air
+
+            // Blood
+	    generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 16, 16, {r:0xff, g:1, b:1});
           }
           break;
 
@@ -949,6 +1039,10 @@ function updateplayerchar()
 
             if (gs.hs!=0)
               gs.hs=(gs.hs>0?-(RUNSPEED*8):(RUNSPEED*8)); // Send back in the opposite direction
+
+            // Electro buzz
+	    generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 16, 16, {r:0xff, g:0xff, b:1});
+	    generateparticles(gs.x+(TILECATWIDTH/2), gs.y+(TILECATHEIGHT/2), 4, 4, {});
           }
           break;
 
@@ -1178,6 +1272,9 @@ function redraw()
 
   // Draw hearts left
   drawlives();
+
+  // Draw the particles
+  drawparticles();
 }
 
 // Request animation frame callback
