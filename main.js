@@ -99,6 +99,7 @@ var gs={
   canvas:null,
   ctx:null,
   scale:1, // Changes when resizing window
+  nightsky:null,
 
   // Tilemap image
   tilemap:null, // main tileset
@@ -144,6 +145,10 @@ var gs={
 
   // Input
   keystate:KEYNONE,
+  padstate:KEYNONE,
+  gamepadbuttons:[], // Button mapping
+  gamepadaxes:[], // Axes mapping
+  gamepadaxesval:[], // Axes values
 
   // Tiles
   tiles:[], // copy of current level (to allow destruction)
@@ -400,7 +405,7 @@ function drawziplines()
       if (gs.chars[id].x<=gs.chars[id].zx)
       {
         // Draw this zipline
-        gs.ctx.fillStyle="rgb(0,0,0)";
+        gs.ctx.strokeStyle="yellow";
         gs.ctx.lineWidth=1;
         gs.ctx.setLineDash([1,1]);
         gs.ctx.beginPath();
@@ -542,7 +547,7 @@ function groundcheck()
     var tilebelow=playerlook(gs.x, gs.y+1)-1;
 
     // Check for jump pressed
-    if (ispressed(KEYUP))
+    if ((ispressed(KEYUP)) || (ispressed(KEYACTION)))
     {
       gs.jump=true;
 
@@ -564,7 +569,7 @@ function groundcheck()
     }
 
     // Check for jump pressed when coyote time not expired
-    if ((ispressed(KEYUP)) && (gs.jump==false) && (gs.coyote>0))
+    if (((ispressed(KEYUP)) || (ispressed(KEYACTION))) && (gs.jump==false) && (gs.coyote>0))
     {
       gs.jump=true;
       gs.vs=-gs.jumpspeed;
@@ -763,7 +768,7 @@ function updatemovements()
   standcheck();
 
   // When a movement key is pressed, adjust players speed and direction
-  if (gs.keystate!=KEYNONE)
+  if ((gs.keystate!=KEYNONE) || (gs.padstate!=KEYNONE))
   {
     // Left key
     if ((ispressed(KEYLEFT)) && (!ispressed(KEYRIGHT)))
@@ -786,10 +791,6 @@ function updatemovements()
       gs.dir=1;
       gs.flip=true;
     }
-
-    // Pressing action key whilst moving on the ground starts running
-    if ((ispressed(KEYACTION)) && (gs.hs!=0) && (!gs.jump) && (!gs.fall))
-      gs.speed=RUNSPEED;
   }
 
   // Handle zipwires
@@ -1146,7 +1147,8 @@ function redraw()
   scrolltoplayer(true);
 
   // Clear the canvas
-  gs.ctx.fillStyle=BGCOLOUR;
+  //gs.ctx.fillStyle=BGCOLOUR;
+  gs.ctx.fillStyle=gs.nightsky;
   gs.ctx.fillRect(0, 0, gs.canvas.width, gs.canvas.height);
 
   // Draw the level
@@ -1200,6 +1202,14 @@ function rafcallback(timestamp)
     // If it's more than 15 seconds since last call, reset
     if ((gs.acc>gs.step) && ((gs.acc/gs.step)>(60*15)))
       gs.acc=gs.step*2;
+
+    // Gamepad support
+    try
+    {
+      if (!!(navigator.getGamepads))
+        gamepadscan();
+    }
+    catch(e){}
 
     // Process "steps" since last call
     while (gs.acc>gs.step)
@@ -1257,6 +1267,11 @@ function init()
   gs.canvas=document.getElementById("canvas");
   gs.ctx=gs.canvas.getContext("2d");
   gs.ctx.imageSmoothingEnabled=false; // don't blur when scaling
+  gs.nightsky=gs.ctx.createLinearGradient(XMAX/2, 0, XMAX/2, YMAX);
+  gs.nightsky.addColorStop(0, "#000000");
+  gs.nightsky.addColorStop(0.85, "#1c2052");
+  gs.nightsky.addColorStop(0.95, "#410e6b");
+  gs.nightsky.addColorStop(1, "#502570");
 
   window.addEventListener("resize", function() { playfieldsize(); });
 
