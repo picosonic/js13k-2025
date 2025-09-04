@@ -64,6 +64,14 @@ const TILEELECTRIC=83;
 const TILEMAGNET=89;
 const TILEDRONE=112;
 const TILEDRONE2=113;
+const TILEDOORLOCKTL=101;
+const TILEDOORLOCKTR=102;
+const TILEDOORTL=103;
+const TILEDOORTR=104;
+const TILEDOORLOCKL=116;
+const TILEDOORLOCKR=117;
+const TILEDOORL=118;
+const TILEDOORR=119;
 const TILECAT=131;
 const TILEHEART=132;
 const TILEHALFHEART=133;
@@ -125,6 +133,7 @@ var gs={
   zipleft:0, // left edge of zipwire
   zipright:0, // right edge of zipwire
   lives:MAXLIVES,
+  key:0, // number of keys collected
 
   // Level attributes
   level:0, // Level number (0 based)
@@ -331,6 +340,7 @@ function loadlevel(level)
             gs.electrotimer=0;
             gs.runtimer=0;
             gs.speed=WALKSPEED;
+            gs.key=0;
             break;
 
           default:
@@ -834,10 +844,35 @@ function updateplayerchar()
           break;
 
         case TILEKEY:
-          // TODO Unlock door(s)
+          gs.key++;
 
           // Remove from map
           gs.chars[id].del=true;
+          break;
+
+        case TILEDOORLOCKL:
+        case TILEDOORLOCKR:
+          // Check for unlocking this door
+          if ((gs.key>0) && (ispressed(KEYDOWN)))
+          {
+            var did=-1;
+
+            // A key has been used
+            gs.key--;
+
+            // Switch closest locked door to this point to an unlocked door
+            did=findnearestchar(gs.chars[id].x, gs.chars[id].y, [TILEDOORLOCKL]);
+            if (did!=-1) gs.chars[did].id=TILEDOORL;
+
+            did=findnearestchar(gs.chars[id].x, gs.chars[id].y, [TILEDOORLOCKR]);
+            if (did!=-1) gs.chars[did].id=TILEDOORR;
+
+            did=findnearestchar(gs.chars[id].x, gs.chars[id].y, [TILEDOORLOCKTL]);
+            if (did!=-1) gs.chars[did].id=TILEDOORTL;
+
+            did=findnearestchar(gs.chars[id].x, gs.chars[id].y, [TILEDOORLOCKTR]);
+            if (did!=-1) gs.chars[did].id=TILEDOORTR;
+          }
           break;
 
         case TILEFLAG:
@@ -921,6 +956,30 @@ function updateplayerchar()
       }
     }
   }
+}
+
+// Find the nearst char of type included in [tileids] to given x, y point or -1
+function findnearestchar(x, y, tileids)
+{
+  var closest=(gs.width*gs.height*TILEHEIGHT);
+  var charid=-1;
+  var dist;
+
+  for (var id=0; id<gs.chars.length; id++)
+  {
+    if (tileids.includes(gs.chars[id].id))
+    {
+      dist=calcHypotenuse(Math.abs(x-gs.chars[id].x), Math.abs(y-gs.chars[id].y));
+
+      if (dist<closest)
+      {
+        charid=id;
+        closest=dist;
+      }
+    }
+  }
+
+  return charid;
 }
 
 function updatecharAI()
@@ -1008,6 +1067,12 @@ function updatecharAI()
         gs.chars.splice(id, 1);
     }
   }
+}
+
+// Determine distance (Hypotenuse) between two lengths in 2D space (using Pythagoras)
+function calcHypotenuse(a, b)
+{
+  return(Math.sqrt((a * a) + (b * b)));
 }
 
 // Update game state, called once per frame
