@@ -3,6 +3,7 @@
 // Global constants
 const XMAX=320;
 const YMAX=180;
+const TARGETFPS=60;
 
 const TILEWIDTH=16;
 const TILEHEIGHT=16;
@@ -16,16 +17,11 @@ const TILESCATPERROW=6;
 
 const BGCOLOUR="rgb(82,98,114)";
 
-const ANIMSPEED=2;
-const WALKSPEED=2;
-const RUNSPEED=3;
-const JUMPSPEED=6; // jump height
-const SPRINGSPEED=8; // jump height on a spring
-const ELECTROTIME=30; // timer while electro
-const CATSAT=60; // time after stopping until sitting
-const RUNTIME=120; // time after starting to walk before running
-const MAXLIVES=(9/2);
-const WATERFLOW=3;
+const STATEINTRO=0;
+const STATEMENU=1;
+const STATEPLAYING=2;
+const STATENEWLEVEL=3;
+const STATECOMPLETE=4;
 
 const KEYNONE=0;
 const KEYLEFT=1;
@@ -33,6 +29,17 @@ const KEYUP=2;
 const KEYRIGHT=4;
 const KEYDOWN=8;
 const KEYACTION=16;
+
+const ANIMSPEED=2;
+const WALKSPEED=2;
+const RUNSPEED=3;
+const JUMPSPEED=6; // jump height
+const SPRINGSPEED=8; // jump height on a spring
+const ELECTROTIME=(TARGETFPS/2); // timer while electro
+const CATSAT=TARGETFPS; // time after stopping until sitting
+const RUNTIME=TARGETFPS*2; // time after starting to walk before running
+const MAXLIVES=(9/2);
+const WATERFLOW=3;
 
 // Cat sprite ids
 const CATMAGNET=1;
@@ -84,7 +91,7 @@ const TILEWATER4=138;
 // Game state
 var gs={
   // animation frame of reference
-  step:(1/60), // target step time @ 60 fps
+  step:(1/TARGETFPS), // target step time @ 60 fps
   acc:0, // accumulated time since last frame
   lasttime:0, // time of last frame
   fps:0, // current FPS
@@ -117,6 +124,7 @@ var gs={
   hs:0, // horizontal speed
   jump:false, // jumping
   fall:false, // falling
+  htime:0, // hurt timer following enemy collision
   dir:0, // direction (-1=left, 0=none, 1=right)
   speed:WALKSPEED, // walking speed
   jumpspeed:JUMPSPEED, // jumping speed
@@ -159,6 +167,9 @@ var gs={
 
   // Particles
   particles:[], // an array of particles
+
+  // Game state
+  state:STATEINTRO, // state machine
 
   // Timeline for animation
   timeline:new timelineobj(), // timeline for general animation
@@ -300,6 +311,28 @@ function loadlevel(level)
 
         switch (tile-1)
         {
+          case TILECAT: // Player
+            gs.x=obj.x; // Set current position
+            gs.y=obj.y;
+
+            gs.sx=gs.x; // Set start position
+            gs.sy=gs.y;
+
+            gs.vs=0; // Start not moving
+            gs.hs=0;
+            gs.jump=false;
+            gs.fall=false;
+            gs.dir=0;
+            gs.flip=false;
+            gs.coyote=0;
+            gs.pausetimer=0;
+            gs.electrotimer=0;
+            gs.runtimer=0;
+            gs.speed=WALKSPEED;
+            gs.key=0;
+            gs.particles=[];
+            break;
+
           case TILEMAGNET: // Magnet for zipline
             // Default to magnet linked to itself
             obj.zx=obj.x;
@@ -334,28 +367,6 @@ function loadlevel(level)
             obj.dy=-1;
             obj.path=[]; // Empty path
             gs.chars.push(obj);
-            break;
-
-          case TILECAT: // Player
-            gs.x=obj.x; // Set current position
-            gs.y=obj.y;
-
-            gs.sx=gs.x; // Set start position
-            gs.sy=gs.y;
-
-            gs.vs=0; // Start not moving
-            gs.hs=0;
-            gs.jump=false;
-            gs.fall=false;
-            gs.dir=0;
-            gs.flip=false;
-            gs.coyote=0;
-            gs.pausetimer=0;
-            gs.electrotimer=0;
-            gs.runtimer=0;
-            gs.speed=WALKSPEED;
-            gs.key=0;
-            gs.particles=[];
             break;
 
           default:
@@ -545,7 +556,7 @@ function playerlook(x, y)
 // Collision check with player hitbox, true/flase
 function playercollide(x, y)
 {
-  return (parseInt(playerlook(x, y), 10)>0);
+  return (parseInt(playerlook(x, y), 10)!=TILENONE);
 }
 
 // Check if player on the ground or falling
@@ -890,6 +901,9 @@ function updatemovements()
     }
   }
 
+  // Decrease hurt timer
+  if (gs.htime>0) gs.htime--;
+
   // Update any animation frames
   updateanimation();
 }
@@ -898,10 +912,10 @@ function updatemovements()
 function updateplayerchar()
 {
   // Generate player hitbox
-  var px=gs.x+(TILEWIDTH/3);
-  var py=gs.y+((TILEHEIGHT/5)*2);
-  var pw=(TILEWIDTH/3);
-  var ph=(TILEHEIGHT/5)*3;
+  var px=gs.x+(TILECATWIDTH/3);
+  var py=gs.y+((TILECATHEIGHT/5)*2);
+  var pw=(TILECATWIDTH/3);
+  var ph=(TILECATHEIGHT/5)*3;
   var id=0;
 
   for (id=0; id<gs.chars.length; id++)
@@ -990,6 +1004,8 @@ function updateplayerchar()
             gs.jump=true;
             gs.fall=false;
 
+            gs.htime=(TARGETFPS/4);
+
             gs.vs=-(gs.jumpspeed*0.75); // Fly up in the air
 
             // Splash
@@ -1008,6 +1024,8 @@ function updateplayerchar()
 
             gs.jump=true;
             gs.fall=false;
+
+            gs.htime=(TARGETFPS/2);
 
             gs.vs=-(gs.jumpspeed*0.80); // Fly up in the air
 
@@ -1030,6 +1048,7 @@ function updateplayerchar()
             gs.magnetised=false;
 
             gs.electrotimer=ELECTROTIME;
+            gs.htime=ELECTROTIME;
 
             gs.jump=true;
             gs.fall=false;
@@ -1267,7 +1286,7 @@ function redraw()
     gs.tileid=((gs.dir==0) && (gs.pausetimer==0))?3:((gs.speed==RUNSPEED)?gs.runanim[gs.frameindex]:gs.walkanim[gs.frameindex]);
 
   // Flash sprite when electro
-  if ((gs.electrotimer==0) || ((gs.electrotimer%7)<=4))
+  if ((gs.htime==0) || ((gs.htime%7)<=4)) // Flash when hurt
     drawcatsprite(gs.tileid, gs.x, playerlook(gs.x, gs.y+1)-1==TILESPRINGUP?gs.y+8:gs.y);
 
   // Draw hearts left
@@ -1297,7 +1316,7 @@ function rafcallback(timestamp)
     gs.acc+=((timestamp-gs.lasttime) / 1000);
 
     // If it's more than 15 seconds since last call, reset
-    if ((gs.acc>gs.step) && ((gs.acc/gs.step)>(60*15)))
+    if ((gs.acc>gs.step) && ((gs.acc/gs.step)>(TARGETFPS*15)))
       gs.acc=gs.step*2;
 
     // Gamepad support
@@ -1325,10 +1344,29 @@ function rafcallback(timestamp)
   window.requestAnimationFrame(rafcallback);
 }
 
-function start()
+// New level screen
+function newlevel(level)
 {
+  gs.state=STATEPLAYING;
   loadlevel(gs.level);
   window.requestAnimationFrame(rafcallback);
+}
+
+// End game animation
+function endgame(percent)
+{
+  if (gs.state!=STATECOMPLETE)
+    return;
+
+  // TODO
+}
+
+// Intro animation
+function intro(percent)
+{
+  // TODO
+  newlevel(0);
+  // TODO
 }
 
 // Entry point
@@ -1392,7 +1430,7 @@ function init()
     {
       gs.tilesloaded=true;
       if (gs.catloaded)
-        start();
+        intro();
     };
     gs.tilemapflip.src=c.toDataURL();
   };
@@ -1416,7 +1454,7 @@ function init()
     {
       gs.catloaded=true;
       if (gs.tilesloaded)
-        start();
+        intro();
     };
     gs.tilemapcatflip.src=c.toDataURL();
   };
