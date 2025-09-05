@@ -21,6 +21,7 @@ jscat="${buildpath}/min.js"
 indexcat="${buildpath}/index.html"
 assetsrc="assets/tilemap_packed.png"
 assetcatsrc="assets/catmap.png"
+assetfontsrc="assets/pixelsquareregularfont.png"
 assetjs="tilemaps.js"
 leveljs="levels.js"
 
@@ -45,7 +46,7 @@ then
 
   # Start new file
   echo -n "var levels=[" > "${leveljs}"
-  for file in assets/level*.tmx
+  for file in `ls assets/level*.tmx | sort -V`
   do
     echo -n "{" >> "${leveljs}"
 
@@ -79,6 +80,7 @@ fi
 # See if the tilemaps asset needs to be rebuilt
 srcdatecat=`stat -c %Y ${assetcatsrc} 2>/dev/null`
 srcdate=`stat -c %Y ${assetsrc} 2>/dev/null`
+srcdatefont=`stat -c %Y ${assetfontsrc} 2>/dev/null`
 destdate=`stat -c %Y ${assetjs} 2>/dev/null`
 
 # If no js asset found, force build
@@ -88,7 +90,7 @@ then
 fi
 
 # When either source is newer, rebuild
-if [ ${srcdate} -gt ${destdate} -o ${srcdatecat} -gt ${destdate} ]
+if [ ${srcdate} -gt ${destdate} -o ${srcdatecat} -gt ${destdate} -o ${srcdatefont} -gt ${destdate} ]
 then
   echo -n "Rebuilding tilemaps JS..."
 
@@ -102,6 +104,10 @@ then
 
   echo -n 'const tilemap="data:image/png;base64,' >> "${assetjs}"
   base64 -w 0 "${assetsrc}" >> "${assetjs}"
+  echo '";' >> "${assetjs}"
+
+  echo -n 'const tilemapfont="data:image/png;base64,' >> "${assetjs}"
+  base64 -w 0 "${assetfontsrc}" >> "${assetjs}"
   echo '";' >> "${assetjs}"
 
   echo "done"
@@ -127,7 +133,7 @@ mkdir "${buildpath}"
 # Concatenate the JS files
 echo "Concatenating JS"
 touch "${jscat}" >/dev/null 2>&1
-for file in "${assetjs}" "${leveljs}" "timeline.js" "inputs.js" "pathfinder.js" "main.js"
+for file in "${assetjs}" "${leveljs}" "writer.js" "timeline.js" "inputs.js" "pathfinder.js" "main.js"
 do
   cat "${file}" >> "${jscat}"
 done

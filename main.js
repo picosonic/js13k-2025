@@ -108,12 +108,14 @@ var gs={
   scale:1, // Changes when resizing window
   nightsky:null,
 
-  // Tilemap image
+  // Tilemap images
   tilemap:null, // main tileset
   tilemapcat:null, // cat sprites tileset
+  font:null, // font tileset
   tilesloaded:false,
   tilemapcatflip:null, // flipped cat sprites
   catloaded:false,
+  fontloaded:false,
 
   // Main character
   x:0, // x position
@@ -1429,8 +1431,8 @@ function init()
     gs.tilemapflip.onload=function()
     {
       gs.tilesloaded=true;
-      if (gs.catloaded)
-        intro();
+      if ((gs.catloaded) && (gs.fontloaded))
+        intro(0);
     };
     gs.tilemapflip.src=c.toDataURL();
   };
@@ -1453,12 +1455,22 @@ function init()
     gs.tilemapcatflip.onload=function()
     {
       gs.catloaded=true;
-      if (gs.tilesloaded)
-        intro();
+      if ((gs.tilesloaded) && (gs.fontloaded))
+        intro(0);
     };
     gs.tilemapcatflip.src=c.toDataURL();
   };
   gs.tilemapcat.src=tilemapcat;
+
+  // Load font tiles
+  gs.font=new Image;
+  gs.font.onload=function()
+  {
+    gs.fontloaded=true;
+    if ((gs.tilesloaded) && (gs.catloaded))
+      intro(0);
+  };
+  gs.font.src=tilemapfont;
 }
 
 // Run the init() once page has loaded
