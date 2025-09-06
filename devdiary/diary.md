@@ -113,3 +113,21 @@ Added water sprites and processing for water
 Locked doors can now be unlocked using a key
 
 Added function to find nearest char of given types
+
+Added particles, e.g. blood when hitting spikes, water splashes, electro buzz, collecting, stomping
+
+Added "midnight" background gradient
+
+Added support for gamepads
+
+5th September
+-------------
+Added state machine so we can transition between intro, playing, new level, e.t.c.
+
+Added "hurt" timer to make player flash (giving temporary invulnerability)
+
+Added font based on [Pixel Square Regular](https://kenney.nl/assets/kenney-fonts) font by Kenney
+
+Created a font PNG based on just A-Z, this is loaded with the other tilemaps. I then wrote a routine to draw the text out using the font tilemap. This was a bit bland so I started on a journey to colourise it
+
+Convert RGB to HSL so that font can be coloured, followed [guide](https://www.rapidtables.com/convert/color/rgb-to-hsl.html), this sort of works for some colours, but not for others. After some digging found a [guide](https://stackoverflow.com/questions/72474574/pass-hex-colors-to-sepia-hue-rotate) which states that because I'm using sepia() to add colour to the font, I need to shift the hue rotation by 50 degrees. This approach seems to give a better result
