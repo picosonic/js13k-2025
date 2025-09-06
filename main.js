@@ -1215,6 +1215,15 @@ function update()
   updateplayerchar();
 }
 
+// Check for level being completed
+function islevelcompleted()
+{
+  // This is defined as ..
+  //   TODO
+
+  return (false);
+}
+
 // Scroll level to player
 function scrolltoplayer(dampened)
 {
@@ -1348,6 +1357,27 @@ function rafcallback(timestamp)
     }
 
     redraw();
+
+    // Check for level completed
+    if ((gs.state==STATEPLAYING) && (islevelcompleted()))
+    {
+      gs.xoffset=0;
+      gs.yoffset=0;
+
+      if ((gs.level+1)==levels.length)
+      {
+        // End of game
+        gs.state=STATECOMPLETE;
+
+        //gs.timeline.reset().add(10*1000, undefined).addcallback(endgame).begin(0);
+      }
+      else
+        newlevel(gs.level+1);
+    }
+
+    // If the update took us out of play state then stop now
+    if (gs.state!=STATEPLAYING)
+      return;
   }
 
   // Remember when we were last called
@@ -1360,6 +1390,7 @@ function rafcallback(timestamp)
 // New level screen
 function newlevel(level)
 {
+  gs.level=level;
   gs.state=STATEPLAYING;
   loadlevel(gs.level);
   window.requestAnimationFrame(rafcallback);
