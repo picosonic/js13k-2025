@@ -999,9 +999,12 @@ function updateplayerchar()
         case TILEWATER4:
           if (gs.fall)
           {
-            // Lose health
-            if (gs.lives>0)
-              gs.lives-=0.5;
+            if (gs.htime==0)
+	    {
+              // Lose health (when not already hurt)
+              if (gs.lives>0)
+                gs.lives-=0.5;
+            }
 
             gs.jump=true;
             gs.fall=false;
@@ -1020,9 +1023,12 @@ function updateplayerchar()
           {
             clearinputstate();
 
-            // Lose health
-            if (gs.lives>0)
-              gs.lives-=0.5;
+            if (gs.htime==0)
+	    {
+              // Lose health (when not already hurt)
+              if (gs.lives>0)
+                gs.lives-=0.5;
+            }
 
             gs.jump=true;
             gs.fall=false;
@@ -1042,9 +1048,12 @@ function updateplayerchar()
           // Don't start electro when already affected by it
           if (gs.electrotimer==0)
           {
-            // Lose health
-            if (gs.lives>0)
-              gs.lives-=0.5;
+            if (gs.htime==0)
+	    {
+              // Lose health (when not already hurt)
+              if (gs.lives>0)
+                gs.lives-=0.5;
+            }
 
             // Drop from magnet if on zipline
             gs.magnetised=false;
