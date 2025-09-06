@@ -1004,17 +1004,18 @@ function updateplayerchar()
               // Lose health (when not already hurt)
               if (gs.lives>0)
                 gs.lives-=0.5;
+
+              gs.htime=(TARGETFPS*1);
             }
 
             gs.jump=true;
             gs.fall=false;
 
-            gs.htime=(TARGETFPS/4);
-
             gs.vs=-(gs.jumpspeed*0.75); // Fly up in the air
 
             // Splash
-	    generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 16, 16, {r:0x29, g:0xad, b:0xff});
+	    generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 32, 32, {r:0x29, g:0xad, b:0xff});
+	    generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 32, 8, {r:0x2ff, g:0xff, b:0xff});
           }
           break;
 
@@ -1028,12 +1029,12 @@ function updateplayerchar()
               // Lose health (when not already hurt)
               if (gs.lives>0)
                 gs.lives-=0.5;
+
+              gs.htime=(TARGETFPS*2);
             }
 
             gs.jump=true;
             gs.fall=false;
-
-            gs.htime=(TARGETFPS/2);
 
             gs.vs=-(gs.jumpspeed*0.80); // Fly up in the air
 
@@ -1053,13 +1054,14 @@ function updateplayerchar()
               // Lose health (when not already hurt)
               if (gs.lives>0)
                 gs.lives-=0.5;
+
+              gs.htime=(TARGETFPS*2);
             }
 
             // Drop from magnet if on zipline
             gs.magnetised=false;
 
             gs.electrotimer=ELECTROTIME;
-            gs.htime=ELECTROTIME;
 
             gs.jump=true;
             gs.fall=false;
