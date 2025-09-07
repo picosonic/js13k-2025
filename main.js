@@ -43,6 +43,8 @@ const WATERFLOW=3;
 
 // Cat sprite ids
 const CATMAGNET=1;
+const CATEYE=2;
+const CATSITTING=3;
 const CATELECTRO=5;
 const CATWALK1=6;
 const CATWALK2=7;
@@ -175,6 +177,9 @@ var gs={
 
   // Timeline for animation
   timeline:new timelineobj(), // timeline for general animation
+
+  // Array of strings to draw
+  strings:[],
 
   // Debug flag
   debug:false
@@ -1275,6 +1280,22 @@ function scrolltoplayer(dampened)
   }
 }
 
+function drawstrings()
+{
+  for (var i=0; i<gs.strings.length; i++)
+  {
+    write(gs.ctx, gs.strings[i].x, gs.strings[i].y,
+      gs.strings[i].text, gs.strings[i].scale, gs.strings[i].rgb);
+  }
+}
+
+function addstring(x, y, text, scale, rgb)
+{
+  gs.strings.push({x:x, y:y, text:text, scale:scale, rgb:rgb});
+
+  return gs.strings.length;
+}
+
 // Redraw game frame
 function redraw()
 {
@@ -1305,7 +1326,7 @@ function redraw()
   else if (gs.fall)
     gs.tileid=CATFALL;
   else
-    gs.tileid=((gs.dir==0) && (gs.pausetimer==0))?3:((gs.speed==RUNSPEED)?gs.runanim[gs.frameindex]:gs.walkanim[gs.frameindex]);
+    gs.tileid=((gs.dir==0) && (gs.pausetimer==0))?CATSITTING:((gs.speed==RUNSPEED)?gs.runanim[gs.frameindex]:gs.walkanim[gs.frameindex]);
 
   // Flash sprite when electro
   if ((gs.htime==0) || ((gs.htime%7)<=4)) // Flash when hurt
@@ -1316,6 +1337,9 @@ function redraw()
 
   // Draw the particles
   drawparticles();
+  
+  // Draw any strings
+  drawstrings();
 }
 
 // Request animation frame callback
@@ -1369,7 +1393,7 @@ function rafcallback(timestamp)
         // End of game
         gs.state=STATECOMPLETE;
 
-        //gs.timeline.reset().add(10*1000, undefined).addcallback(endgame).begin(0);
+        gs.timeline.reset().add(10*1000, undefined).addcallback(endgame).begin(0);
       }
       else
         newlevel(gs.level+1);
@@ -1390,10 +1414,22 @@ function rafcallback(timestamp)
 // New level screen
 function newlevel(level)
 {
+  if ((level<0) || (level>=levels.length))
+    return;
+
+  // Ensure timeline is stopped
+  gs.timeline.end().reset();
+  gs.timeline=new timelineobj();
+
   gs.level=level;
   gs.state=STATEPLAYING;
   loadlevel(gs.level);
   window.requestAnimationFrame(rafcallback);
+}
+
+function resettointro()
+{
+  gs.timeline.reset().add(10*1000, undefined).addcallback(intro).begin(0);
 }
 
 // End game animation
@@ -1402,15 +1438,69 @@ function endgame(percent)
   if (gs.state!=STATECOMPLETE)
     return;
 
+  // Check if done or control key/gamepad pressed
+  if ((percent>=98) || (gs.keystate!=KEYNONE) || (gs.padstate!=KEYNONE))
+  {
+    gs.state=STATEINTRO;
+    gs.ctx.clearRect(0, 0, gs.canvas.width, gs.canvas.height);
+    setTimeout(resettointro, 300);
+  }
+
   // TODO
+}
+
+function draweyes()
+{
+  var fs=gs.flip
+  var cex=130;
+  var cey=80;
+
+  gs.flip=false;
+  drawcatsprite(CATEYE, cex+gs.xoffset, cey+gs.yoffset);
+
+  gs.flip=true;
+  drawcatsprite(CATEYE, cex+50+gs.xoffset, cey+gs.yoffset);
+
+  gs.flip=fs;
 }
 
 // Intro animation
 function intro(percent)
 {
+  // Check if done or control key/gamepad pressed
+  if ((percent>=98) || (gs.keystate!=KEYNONE) || (gs.padstate!=KEYNONE))
+  {
+    newlevel(0);
+  }
+  else
+  {
+    var tenth=Math.floor(percent/10);
+
+    switch (tenth)
+    {
+      case 0:
+        gs.ctx.clearRect(0, 0, gs.canvas.width, gs.canvas.height);
+        break;
+
+      case 1:
+        draweyes();
+        break;
+
+      case 3:
+        write(gs.ctx, 100, 50, "MOCHI", 2, {r:255, g:0, b:255});
+        break;
+
+      case 5:
+        write(gs.ctx, 100, 120, "AND THE MIDNIGHT ESCAPE", 1, {r:255, g:0, b:255});
+        break;
+
+      default:
+        break;
+    }
+  }
+
   // TODO
-  newlevel(0);
-  // TODO
+  //addstring(0, 0, "MOCHI AND THE MIDNIGHT ESCAPE", 1, {r:255, g:0, b:255});
 }
 
 // Entry point
@@ -1456,6 +1546,9 @@ function init()
 
   playfieldsize();
 
+  // Set up intro animation callback
+  gs.timeline.reset().add(5*1000, undefined).addcallback(intro);
+
   // Once loaded, start
   gs.tilemap=new Image;
   gs.tilemap.onload=function()
@@ -1474,7 +1567,7 @@ function init()
     {
       gs.tilesloaded=true;
       if ((gs.catloaded) && (gs.fontloaded))
-        intro(0);
+        gs.timeline.begin(0);
     };
     gs.tilemapflip.src=c.toDataURL();
   };
@@ -1498,7 +1591,7 @@ function init()
     {
       gs.catloaded=true;
       if ((gs.tilesloaded) && (gs.fontloaded))
-        intro(0);
+        gs.timeline.begin(0);
     };
     gs.tilemapcatflip.src=c.toDataURL();
   };
@@ -1510,7 +1603,7 @@ function init()
   {
     gs.fontloaded=true;
     if ((gs.tilesloaded) && (gs.catloaded))
-      intro(0);
+      gs.timeline.begin(0);
   };
   gs.font.src=tilemapfont;
 }
