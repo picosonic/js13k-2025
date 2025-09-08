@@ -346,8 +346,14 @@ function usedoor(x, y)
     }
   });
 
-  if (doorused) // Prevent double press
+  if (doorused)
+  {
+    // Go to new position
+    scrolltoplayer(false);
+
+    // Prevent double press
     gs.doortimer=(TARGETFPS*2);
+  }
 }
 
 // Load level
