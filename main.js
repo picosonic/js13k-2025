@@ -1453,7 +1453,7 @@ function draweyes()
 {
   var fs=gs.flip
   var cex=130;
-  var cey=80;
+  var cey=70;
 
   gs.flip=false;
   drawcatsprite(CATEYE, cex+gs.xoffset, cey+gs.yoffset);
@@ -1468,7 +1468,13 @@ function draweyes()
 function intro(percent)
 {
   // Check if done or control key/gamepad pressed
-  if ((percent>=98) || (gs.keystate!=KEYNONE) || (gs.padstate!=KEYNONE))
+  if (percent>=98)
+  {
+    gs.timeline.end();
+    setTimeout(resettointro, 3*1000);
+  }
+  else
+  if ((gs.keystate!=KEYNONE) || (gs.padstate!=KEYNONE))
   {
     newlevel(0);
   }
@@ -1487,20 +1493,21 @@ function intro(percent)
         break;
 
       case 3:
-        write(gs.ctx, 100, 50, "MOCHI", 2, {r:255, g:0, b:255});
+        write(gs.ctx, 40, 40, "MOCHI", 2, {r:255, g:0, b:255});
         break;
 
       case 5:
-        write(gs.ctx, 100, 120, "AND THE MIDNIGHT ESCAPE", 1, {r:255, g:0, b:255});
+        write(gs.ctx, 160, 110, "AND THE MIDNIGHT ESCAPE", 1, {r:255, g:0, b:255});
+        break;
+
+      case 6:
+        write(gs.ctx, 80, 160, "WASD ZQSD CURSORS OR GAMEPAD", 1, {r:255, g:223, b:0});
         break;
 
       default:
         break;
     }
   }
-
-  // TODO
-  //addstring(0, 0, "MOCHI AND THE MIDNIGHT ESCAPE", 1, {r:255, g:0, b:255});
 }
 
 // Entry point
@@ -1547,7 +1554,7 @@ function init()
   playfieldsize();
 
   // Set up intro animation callback
-  gs.timeline.reset().add(5*1000, undefined).addcallback(intro);
+  gs.timeline.reset().add(10*1000, undefined).addcallback(intro);
 
   // Once loaded, start
   gs.tilemap=new Image;
