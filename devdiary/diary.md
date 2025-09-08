@@ -155,4 +155,6 @@ Start game in intro state and transition to playing after user interaction
 -------------
 Updates to intro, made it loop and added animation to reveal cat's eyes, game name and controls
 
-Switch keyboard UIevent processing from e.which to e.code due to [deprectated api](https://developer.mozilla.org/en-US/docs/Web/API/UIEvent/which)
+Switch keyboard UIEvent processing from e.which to e.code due to [deprectated api](https://developer.mozilla.org/en-US/docs/Web/API/UIEvent/which)
+
+Made doors functional, pressing down on a locked door when key is held will unlock the door, then pressing down on an unlocked door will transport you to the linked door - delays on door use were also introduced to prevent flicking between doors
