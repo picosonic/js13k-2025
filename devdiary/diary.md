@@ -158,3 +158,7 @@ Updates to intro, made it loop and added animation to reveal cat's eyes, game na
 Switch keyboard UIEvent processing from e.which to e.code due to [deprectated api](https://developer.mozilla.org/en-US/docs/Web/API/UIEvent/which)
 
 Made doors functional, pressing down on a locked door when key is held will unlock the door, then pressing down on an unlocked door will transport you to the linked door - delays on door use were also introduced to prevent flicking between doors
+
+Fixed issue when ziplining over a close block the zipline could drop
+
+Fixed issue with jump on AZERTY keyboards
