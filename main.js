@@ -750,6 +750,9 @@ function collisioncheck()
   }
   gs.x+=Math.floor(gs.hs);
 
+  // Don't apply gravity when magnetised
+  if (gs.magnetised) return;
+
   // Check for vertical collisions
   if ((gs.vs!=0) && (playercollide(gs.x, gs.y+gs.vs)))
   {
@@ -774,9 +777,7 @@ function collisioncheck()
     }
   }
 
-  // Apply gravity when not magnetised
-  if (!gs.magnetised)
-    gs.y=Math.floor(gs.y+gs.vs);
+  gs.y=Math.floor(gs.y+gs.vs);
 }
 
 // Slow the player using friction
