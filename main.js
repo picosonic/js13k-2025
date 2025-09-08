@@ -155,6 +155,9 @@ var gs={
   height:0, // height in tiles
   xoffset:0, // current view offset from left (horizontal scroll)
   yoffset:0, // current view offset from top (vertical scroll)
+  doors:[], // array of door pairs
+  electricity:[], // array of electricity for when it's turned back on
+  leverallowed:0, // time to wait until electricity lever is allowed
 
   // Input
   keystate:KEYNONE,
@@ -372,9 +375,15 @@ function loadlevel(level)
   gs.width=parseInt(levels[gs.level].width, 10);
   gs.height=parseInt(levels[gs.level].height, 10);
 
+  // Start with empty set of characters
   gs.chars=[];
 
+  // Work out where all the door pairs are
   loaddoors(levels[gs.level].doors);
+
+  // Start with no electricity turned off
+  gs.electricity=[];
+  gs.leverallowed=0;
 
   // Populate chars (non solid tiles)
   for (var y=0; y<gs.height; y++)
@@ -647,10 +656,6 @@ function groundcheck()
   // Check for pause time
   if (gs.pausetimer>0)
     gs.pausetimer--;
-
-  // Check for electro time
-  if (gs.electrotimer>0)
-    gs.electrotimer--;
 
   // Check for run time
   if (gs.runtimer>0)
@@ -986,6 +991,12 @@ function updatemovements()
   // Decrease door timer
   if (gs.doortimer>0) gs.doortimer--;
 
+  // Check for electro timer
+  if (gs.electrotimer>0) gs.electrotimer--;
+
+  // Check for electro lever being allowed
+  if (gs.leverallowed>0) gs.leverallowed--;
+
   // Update any animation frames
   updateanimation();
 }
@@ -1073,20 +1084,57 @@ function updateplayerchar()
           break;
 
         case TILELEVERON:
+	  if ((gs.leverallowed==0) && (ispressed(KEYDOWN)))
 	  {
 	    for (var id2=0; id2<gs.chars.length; id2++)
 	    {
               // Remove electro
 	      if (gs.chars[id2].id==TILEELECTRIC)
 	      {
-                gs.chars[id2].ttl=id2;
+                gs.chars[id2].ttl=Math.floor((gs.chars[id2].y/TILEHEIGHT)*2);
                 gs.chars[id2].del=true;
+                gs.electricity.push(JSON.parse(JSON.stringify(gs.chars[id2])));
               }
+
+              // Switch all levers to off
+              if (gs.chars[id2].id==TILELEVERON)
+                gs.chars[id2].id=TILELEVEROFF;
 	    }
 
-            // Switch to pole
-            gs.chars[id].id=TILELEVEROFF;
+            // Prevent switch being flickered
+            gs.leverallowed=(TARGETFPS*2);
 	  }
+          break;
+
+        case TILELEVEROFF:
+          if ((gs.leverallowed==0) && (ispressed(KEYDOWN)))
+          {
+            if (gs.electricity.length>0)
+            {
+              for (var id2=0; id2<gs.electricity.length; id2++)
+              {
+                var newelec=JSON.parse(JSON.stringify(gs.electricity[id2]));
+                newelec.del=false;
+                gs.chars.push(newelec);
+              }
+
+              // Clear the list
+              gs.electricity=[];
+
+              // Switch all levers to on
+              for (var id3=0; id3<gs.chars.length; id3++)
+	      {
+                if (gs.chars[id3].id==TILELEVEROFF)
+                  gs.chars[id3].id=TILELEVERON;
+              }
+            }
+
+            // Switch lever to on
+            gs.chars[id].id=TILELEVERON;
+
+            // Prevent switch being flickered
+            gs.leverallowed=(TARGETFPS*2);
+          }
           break;
 
         case TILEWATER:
@@ -1428,7 +1476,7 @@ function redraw()
 
   // Draw the particles
   drawparticles();
-  
+
   // Draw any strings
   drawstrings();
 }

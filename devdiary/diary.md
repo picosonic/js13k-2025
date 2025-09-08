@@ -162,3 +162,5 @@ Made doors functional, pressing down on a locked door when key is held will unlo
 Fixed issue when ziplining over a close block the zipline could drop
 
 Fixed issue with jump on AZERTY keyboards
+
+Allow levers to turn on/off electricity, and make all levers be in sync
