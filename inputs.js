@@ -20,11 +20,11 @@ function ispressed(keybit)
 // Update the player key state
 function updatekeystate(e, dir)
 {
-  switch (e.which)
+  switch (e.code)
   {
-    case 37: // cursor left
-    case 65: // A
-    case 90: // Z
+    case "ArrowLeft": // cursor left
+    case "KeyA": // A
+    case "KeyZ": // Z
       if (dir==1)
         gs.keystate|=KEYLEFT;
       else
@@ -33,9 +33,9 @@ function updatekeystate(e, dir)
       e.preventDefault();
       break;
 
-    case 38: // cursor up
-    case 87: // W
-    case 59: // semicolon
+    case "ArrowUp": // cursor up
+    case "KeyW": // W
+    case "Semicolon": // semicolon
       if (dir==1)
         gs.keystate|=KEYUP;
       else
@@ -44,9 +44,9 @@ function updatekeystate(e, dir)
       e.preventDefault();
       break;
 
-    case 39: // cursor right
-    case 68: // D
-    case 88: // X
+    case "ArrowRight": // cursor right
+    case "KeyD": // D
+    case "KeyX": // X
       if (dir==1)
         gs.keystate|=KEYRIGHT;
       else
@@ -55,9 +55,9 @@ function updatekeystate(e, dir)
       e.preventDefault();
       break;
 
-    case 40: // cursor down
-    case 83: // S
-    case 190: // dot
+    case "ArrowDown": // cursor down
+    case "KeyS": // S
+    case "Period": // dot
       if (dir==1)
         gs.keystate|=KEYDOWN;
       else
@@ -66,8 +66,8 @@ function updatekeystate(e, dir)
       e.preventDefault();
       break;
 
-    case 13: // enter
-    case 32: // space
+    case "Enter": // enter
+    case "Space": // space
       if (dir==1)
         gs.keystate|=KEYACTION;
       else
@@ -76,7 +76,7 @@ function updatekeystate(e, dir)
       e.preventDefault();
       break;
 
-    case 73: // I (for info/debug)
+    case "KeyI": // I (for info/debug)
       if (dir==1)
         gs.debug=(!gs.debug);
 
@@ -104,6 +104,7 @@ function gamepadscan()
   var gdown=false;
   var gjump=false;
 
+  // Find active pads
   for (var padid=0; padid<gamepads.length; padid++)
   {
     // Only support first found gamepad
@@ -221,7 +222,7 @@ function gamepadscan()
           gs.gamepadbuttons[1]=-1; // right (left) d-right
           gs.gamepadbuttons[2]=-1; // top (left) d-up
           gs.gamepadbuttons[3]=-1; // bottom (left) d-down
-          gs.gamepadbuttons[4]=0;  // bottom button (right) x
+          gs.gamepadbuttons[4]=0;  // bottom button (right) x (a on Stadia)
 
           gs.gamepadaxes[0]=0; // left/right axis
           gs.gamepadaxes[1]=1; // up/down axis
