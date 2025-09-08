@@ -66,8 +66,8 @@ const TILENONE=0;
 const TILESPRINGUP=30;
 const TILESPRINGDOWN=15;
 const TILEKEY=66;
-const TILEFLAG=73;
-const TILEPOLE=74;
+const TILELEVERON=73;
+const TILELEVEROFF=74;
 const TILESPIKES=75;
 const TILEELECTRIC=83;
 const TILEMAGNET=89;
@@ -1071,7 +1071,7 @@ function updateplayerchar()
           }
           break;
 
-        case TILEFLAG:
+        case TILELEVERON:
 	  {
 	    for (var id2=0; id2<gs.chars.length; id2++)
 	    {
@@ -1084,7 +1084,7 @@ function updateplayerchar()
 	    }
 
             // Switch to pole
-            gs.chars[id].id=TILEPOLE;
+            gs.chars[id].id=TILELEVEROFF;
 	  }
           break;
 
