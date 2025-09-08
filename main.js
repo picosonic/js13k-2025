@@ -137,6 +137,7 @@ var gs={
   pausetimer:0, // countdown timer after stopping movement before sitting down
   runtimer:0, // countdown timer after walking starts before running
   electrotimer:0, // countdown timer after being electrocuted
+  doortimer:0, // delay after unlocking or using a door before a door can be used
   flip:false, // if player is horizontally flipped
   tileid:TILECAT, // current player tile
   frameindex:0, // current animation frame
@@ -287,6 +288,68 @@ function sortChars(a, b)
   return 0; // same id
 }
 
+// Process doors
+function loaddoors(doortext)
+{
+  // Clear any current doors
+  gs.doors=[];
+
+  // Make sure we have doors for this level
+  if ((doortext==undefined) || (doortext.length==0))
+    return;
+
+  // Split on "|" - for multiple door pairs
+  doortext.split("|").forEach((doorpair) => {
+    // Split on "," - for A and B
+    var doorab=doorpair.split(",");
+
+    if (doorab.length==2)
+    {
+      // Split on "x" - for X and Y for this door
+      var coordsa=doorab[0].split("x");
+      var coordsb=doorab[1].split("x");
+
+      // If we have all the data, then add door pair
+      if ((coordsa.length==2) && (coordsb.length==2))
+        gs.doors.push({ax:coordsa[0], ay:coordsa[1], bx:coordsb[0], by:coordsb[1]});
+    }
+  });
+}
+
+// Go through a door
+function usedoor(x, y)
+{
+  var sx=Math.floor(x/TILEWIDTH);
+  var sy=Math.floor(y/TILEHEIGHT);
+  var doorused=false;
+
+  // Check for no doors defined
+  if (gs.doors.length==0) return;
+
+  // Find out which door it was
+  gs.doors.forEach((doorpair) => {
+    // If match found, transfer to other door in pair
+    if ((sx==doorpair.ax) && (sy==doorpair.ay))
+    {
+      gs.x=(doorpair.bx*TILEWIDTH);
+      gs.y=(doorpair.by*TILEHEIGHT);
+
+      doorused=true;
+    }
+    else
+    if ((sx==doorpair.bx) && (sy==doorpair.by))
+    {
+      gs.x=(doorpair.ax*TILEWIDTH);
+      gs.y=(doorpair.ay*TILEHEIGHT);
+
+      doorused=true;
+    }
+  });
+
+  if (doorused) // Prevent double press
+    gs.doortimer=(TARGETFPS*2);
+}
+
 // Load level
 function loadlevel(level)
 {
@@ -304,6 +367,8 @@ function loadlevel(level)
   gs.height=parseInt(levels[gs.level].height, 10);
 
   gs.chars=[];
+
+  loaddoors(levels[gs.level].doors);
 
   // Populate chars (non solid tiles)
   for (var y=0; y<gs.height; y++)
@@ -911,6 +976,9 @@ function updatemovements()
   // Decrease hurt timer
   if (gs.htime>0) gs.htime--;
 
+  // Decrease door timer
+  if (gs.doortimer>0) gs.doortimer--;
+
   // Update any animation frames
   updateanimation();
 }
@@ -978,6 +1046,22 @@ function updateplayerchar()
 
             did=findnearestchar(gs.chars[id].x, gs.chars[id].y, [TILEDOORLOCKTR]);
             if (did!=-1) gs.chars[did].id=TILEDOORTR;
+
+            // Prevent double press
+            gs.doortimer=(TARGETFPS*2);
+          }
+          break;
+
+        case TILEDOORL:
+        case TILEDOORR:
+          // Check for using this door
+          if ((gs.doortimer==0) && (ispressed(KEYDOWN)))
+          {
+            // Prevent double press
+            clearinputstate();
+
+            // Try to go through this door
+            usedoor(gs.chars[id].x, gs.chars[id].y);
           }
           break;
 

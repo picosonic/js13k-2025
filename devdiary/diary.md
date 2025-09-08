@@ -118,7 +118,7 @@ Added particles, e.g. blood when hitting spikes, water splashes, electro buzz, c
 
 Added "midnight" background gradient
 
-Added support for gamepads
+Added support for gamepads based on code from my previous JS13k entries [2018 Planet Figadore Has Gone Offline](https://js13kgames.com/entries/planet-figadore-has-gone-offline) and [2021 Airspace Alpha Zulu](https://js13kgames.com/entries/airspace-alpha-zulu)
 
 5th September
 -------------
@@ -131,3 +131,28 @@ Added font based on [Pixel Square Regular](https://kenney.nl/assets/kenney-fonts
 Created a font PNG based on just A-Z, this is loaded with the other tilemaps. I then wrote a routine to draw the text out using the font tilemap. This was a bit bland so I started on a journey to colourise it
 
 Convert RGB to HSL so that font can be coloured, followed [guide](https://www.rapidtables.com/convert/color/rgb-to-hsl.html), this sort of works for some colours, but not for others. After some digging found a [guide](https://stackoverflow.com/questions/72474574/pass-hex-colors-to-sepia-hue-rotate) which states that because I'm using sepia() to add colour to the font, I need to shift the hue rotation by 50 degrees. This approach seems to give a better result
+
+6th September
+-------------
+Added level complete check stub. Once I've defined what is required to complete a level, this will transition to the next level
+
+Fixed an issue with an assumption in my timeline library that the optional associated objects would always be set
+
+7th September
+-------------
+Added cat's eye sprite, to be used in the intro, including a draw routine which does the flipping and draws them the right distance apart
+
+Added global strings array so that text can be rendered easier
+
+Added end of game stub, for when game is complete an animation can be shown
+As part of this if the user interacts or the animation ends, it loops back to the intro
+
+Ensure when changing levels that any timelines are stopped and the new level number is a valid one
+
+Start game in intro state and transition to playing after user interaction
+
+8th September
+-------------
+Updates to intro, made it loop and added animation to reveal cat's eyes, game name and controls
+
+Switch keyboard UIevent processing from e.which to e.code due to [deprectated api](https://developer.mozilla.org/en-US/docs/Web/API/UIEvent/which)
