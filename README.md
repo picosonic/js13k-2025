@@ -23,6 +23,6 @@ Controls are :
 
 # Attribution of assets
 
-_Using some assets from [Kenney.nl "Pico-8 Platformer"](https://kenney.nl/assets/pico-8-platformer) (Creative Commons Zero, CC0 license)_
+_Using some assets from Kenney.nl based on ["Pico-8 Platformer"](https://kenney.nl/assets/pico-8-platformer) tiles and [Pixel Square Regular](https://kenney.nl/assets/kenney-fonts) font, both Creative Commons Zero, CC0 license_
 
 _Using some assets from [Cat sprites](https://opengameart.org/content/cat-sprites) with no attribution, credit [Shepardskin](https://x.com/Shepardskin)_
