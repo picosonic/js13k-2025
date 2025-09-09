@@ -1269,8 +1269,6 @@ function updatecharAI()
 
   for (id=0; id<gs.chars.length; id++)
   {
-    var nx;
-
     switch (gs.chars[id].id)
     {
       case TILESWEEPER:
