@@ -69,7 +69,9 @@ const TILEKEY=66;
 const TILELEVERON=73;
 const TILELEVEROFF=74;
 const TILESPIKES=75;
+const TILECLOUD=81;
 const TILEELECTRIC=83;
+const TILESTAR=88;
 const TILEMAGNET=89;
 const TILEDRONE=112;
 const TILEDRONE2=113;
@@ -160,6 +162,7 @@ var gs={
   doors:[], // array of door pairs
   electricity:[], // array of electricity for when it's turned back on
   leverallowed:0, // time to wait until electricity lever is allowed
+  score:0, // score for the level
 
   // Input
   keystate:KEYNONE,
@@ -177,6 +180,9 @@ var gs={
 
   // Particles
   particles:[], // an array of particles
+
+  // Parallax
+  parallax:[], // an array of particles placed at random x, y, z
 
   // Game state
   state:STATEINTRO, // state machine
@@ -387,6 +393,9 @@ function loadlevel(level)
   gs.electricity=[];
   gs.leverallowed=0;
 
+  // Reset score
+  gs.score=0;
+
   // Populate chars (non solid tiles)
   for (var y=0; y<gs.height; y++)
   {
@@ -455,6 +464,7 @@ function loadlevel(level)
             obj.dx=-1; // Null destination
             obj.dy=-1;
             obj.path=[]; // Empty path
+            obj.seenplayer=false;
             gs.chars.push(obj);
             break;
 
@@ -476,6 +486,12 @@ function loadlevel(level)
 
   // Sort chars such sprites are at the end (so are drawn last, i.e on top)
   gs.chars.sort(sortChars);
+
+  // Populate parallax field
+  gs.parallax=[];
+  for (var i=0; i<4; i++)
+    for (var z=1; z<=2; z++)
+      gs.parallax.push({t:Math.floor(rng()*2), x:Math.floor((rng()*gs.width)*TILEWIDTH), y:Math.floor((rng()*(gs.height/2))*TILEHEIGHT), z:(z*10)});
 
   // Move scroll offset to player with damping disabled
   scrolltoplayer(false);
@@ -535,6 +551,13 @@ function drawparticles()
 {
   for (var i=0; i<gs.particles.length; i++)
     drawparticle(gs.particles[i]);
+}
+
+// Draw parallax
+function drawparallax()
+{
+  for (var i=0; i<gs.parallax.length; i++)
+    drawtile(TILECLOUD+gs.parallax[i].t, gs.parallax[i].x-Math.floor(gs.xoffset/gs.parallax[i].z), gs.parallax[i].y-Math.floor(gs.yoffset/gs.parallax[i].z));  
 }
 
 function drawziplines()
@@ -1052,6 +1075,16 @@ function updateplayerchar()
           gs.chars[id].del=true;
           break;
 
+        case TILESTAR:
+          gs.score++;
+
+          // Shiny
+          generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 1, 1, {r:0xff, g:0xff, b:1});
+
+          // Remove from map
+          gs.chars[id].del=true;
+          break;
+
         case TILEDOORLOCKL:
         case TILEDOORLOCKR:
           // Check for unlocking this door
@@ -1357,6 +1390,17 @@ function updatecharAI()
 
       case TILEDRONE:
       case TILEDRONE2:
+        if (calcHypotenuse(Math.abs(gs.x-gs.chars[id].x), Math.abs(gs.y-gs.chars[id].y))<(TILEWIDTH*4))
+        {
+          if (gs.chars[id].seenplayer==false)
+          {
+            gs.chars[id].path=[];
+
+          }
+
+          gs.chars[id].seenplayer=true;
+        }
+
         // Check if following a path, then move to next node
         if (gs.chars[id].path.length>0)
         {
@@ -1404,10 +1448,25 @@ function updatecharAI()
         else
         {
           // Not following a path
+          if (gs.chars[id].seenplayer)
+          {
+            // Go to where player is
+            nx=Math.floor(gs.x/TILEWIDTH);
+            ny=Math.floor(gs.y/TILEHEIGHT);
+          }
+          else
+          {
+            do
+            {
+              nx=Math.floor(rng()*gs.width);
+              ny=Math.floor(rng()*gs.height);
+            } while (collide(nx*TILEWIDTH, ny*TILEHEIGHT, TILEWIDTH, TILEHEIGHT));
+          }
+
           gs.chars[id].path=pathfinder(
             (Math.floor(gs.chars[id].y/TILEHEIGHT)*gs.width)+Math.floor(gs.chars[id].x/TILEWIDTH)
             ,
-            (Math.floor(gs.y/TILEHEIGHT)*gs.width)+Math.floor(gs.x/TILEWIDTH)
+            (ny*gs.width)+nx
             );
         }
 
@@ -1419,13 +1478,23 @@ function updatecharAI()
             switch (gs.chars[id2].id)
             {
               case TILEELECTRIC:
-                generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 32, 16, {r:0xff, g:0xff, b:1});
-                gs.chars[id].path=[];
-
-                if (gs.chars[id].del==false)
+                if (gs.chars[id].seenplayer)
                 {
-                  gs.chars[id].del=true;
-                  gs.chars[id].ttl=TARGETFPS;
+                  generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 32, 16, {r:0xff, g:0xff, b:1});
+                  gs.chars[id].path=[];
+
+                  if (gs.chars[id].del==false)
+                  {
+                    gs.chars[id].del=true;
+                    gs.chars[id].ttl=TARGETFPS;
+                  }
+                }
+                else
+                {
+                  gs.chars[id].x=ox;
+                  gs.chars[id].y=oy;
+
+                  gs.chars[id].path=[]; // We went into electric by accident - so run away
                 }
                 break;
 
@@ -1569,6 +1638,9 @@ function redraw()
   //gs.ctx.fillStyle=BGCOLOUR;
   gs.ctx.fillStyle=gs.nightsky;
   gs.ctx.fillRect(0, 0, gs.canvas.width, gs.canvas.height);
+
+  // Draw the parallax
+  drawparallax();
 
   // Draw the level
   drawlevel();
