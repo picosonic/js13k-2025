@@ -170,3 +170,21 @@ Added sweeper, who patrols until it sees the player
 Allow drone to be removed with electricity
 
 Allow sweeper to fall of edges when chasing player
+
+9th September
+-------------
+Fix sweeper getting "stuck" overlapping tiles when following player
+
+Water and spikes now harm sweeper
+
+Added cloud parallax
+
+Added stars which add to score when collected
+
+Drone starts off navigating randomly, when player is seen it switches to hunt mode
+
+Drone avoids electricity unless hunting player so that it doesn't self-terminate
+
+Resized tilemap, removing some unused tiles to save a few bytes
+
+Added saving/restoring of progress

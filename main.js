@@ -1,4 +1,5 @@
 // JS 13k 2025 entry
+// Mochi and the midnight escape
 
 // Global constants
 const XMAX=320;
@@ -81,6 +82,10 @@ const TILEDOORLOCKTL=101;
 const TILEDOORLOCKTR=102;
 const TILEDOORTL=103;
 const TILEDOORTR=104;
+const TILEWATER=105;
+const TILEWATER2=106;
+const TILEWATER3=107;
+const TILEWATER4=108;
 const TILEDOORLOCKL=116;
 const TILEDOORLOCKR=117;
 const TILEDOORL=118;
@@ -89,10 +94,6 @@ const TILECAT=131;
 const TILEHEART=132;
 const TILEHALFHEART=133;
 const TILEEMPTYHEART=134;
-const TILEWATER=135;
-const TILEWATER2=136;
-const TILEWATER3=137;
-const TILEWATER4=138;
 
 // Game state
 var gs={
@@ -163,6 +164,7 @@ var gs={
   electricity:[], // array of electricity for when it's turned back on
   leverallowed:0, // time to wait until electricity lever is allowed
   score:0, // score for the level
+  completed:[], // set of booleans indicating if each level has been completed
 
   // Input
   keystate:KEYNONE,
@@ -557,7 +559,7 @@ function drawparticles()
 function drawparallax()
 {
   for (var i=0; i<gs.parallax.length; i++)
-    drawtile(TILECLOUD+gs.parallax[i].t, gs.parallax[i].x-Math.floor(gs.xoffset/gs.parallax[i].z), gs.parallax[i].y-Math.floor(gs.yoffset/gs.parallax[i].z));  
+    drawtile(TILECLOUD+gs.parallax[i].t, gs.parallax[i].x-Math.floor(gs.xoffset/gs.parallax[i].z), gs.parallax[i].y-Math.floor(gs.yoffset/gs.parallax[i].z));
 }
 
 function drawziplines()
@@ -1393,10 +1395,7 @@ function updatecharAI()
         if (calcHypotenuse(Math.abs(gs.x-gs.chars[id].x), Math.abs(gs.y-gs.chars[id].y))<(TILEWIDTH*4))
         {
           if (gs.chars[id].seenplayer==false)
-          {
             gs.chars[id].path=[];
-
-          }
 
           gs.chars[id].seenplayer=true;
         }
@@ -1723,6 +1722,14 @@ function rafcallback(timestamp)
       gs.xoffset=0;
       gs.yoffset=0;
 
+      gs.completed[gs.level]=true;
+
+      try
+      {
+        window.localStorage.setItem('mochimidnightescape', JSON.stringify({score:gs.score, completed:gs.completed}));
+      }
+      catch (e){}
+
       if ((gs.level+1)==levels.length)
       {
         // End of game
@@ -1887,6 +1894,24 @@ function init()
   window.addEventListener("resize", function() { playfieldsize(); });
 
   playfieldsize();
+
+  // Init level vars which are stored between plays
+  gs.score=0;
+  for (var i=0; i<levels.length; i++)
+    gs.completed[i]=false;
+
+  // Restore from localStorage
+  try
+  {
+    var savedata=window.localStorage.getItem("mochimidnightescape");
+    if ((savedata!=undefined) && (savedata!=null))
+    {
+      savedata=JSON.parse(savedata);
+      gs.score=savedata.score;
+      gs.completed=savedata.completed;
+    }
+  }
+  catch (e) {}
 
   // Set up intro animation callback
   gs.timeline.reset().add(10*1000, undefined).addcallback(intro);
