@@ -73,6 +73,7 @@ const TILEELECTRIC=83;
 const TILEMAGNET=89;
 const TILEDRONE=112;
 const TILEDRONE2=113;
+const TILESWEEPER=114;
 const TILEDOORLOCKTL=101;
 const TILEDOORLOCKTR=102;
 const TILEDOORTL=103;
@@ -273,7 +274,7 @@ function drawcatsprite(tileid, x, y)
 // Sort the chars so sprites are last (so they appear in front of non-solid tiles)
 function sortChars(a, b)
 {
-  const sprites=[TILEDRONE, TILEDRONE2];
+  const sprites=[TILEDRONE, TILEDRONE2, TILESWEEPER];
 
   if (a.id!=b.id) // extra processing if they are different ids
   {
@@ -453,6 +454,13 @@ function loadlevel(level)
             obj.dx=-1; // Null destination
             obj.dy=-1;
             obj.path=[]; // Empty path
+            gs.chars.push(obj);
+            break;
+
+          case TILESWEEPER:
+            obj.hs=(rng()<0.5)?0.5:-0.5;
+            obj.flip=(obj.hs<0);
+            obj.fall=false;
             gs.chars.push(obj);
             break;
 
@@ -1261,8 +1269,60 @@ function updatecharAI()
 
   for (id=0; id<gs.chars.length; id++)
   {
+    var nx;
+
     switch (gs.chars[id].id)
     {
+      case TILESWEEPER:
+          // Check for solid ground underneath
+	  if ((!gs.chars[id].fall) && (!collide(gs.chars[id].x, gs.chars[id].y+1, TILEWIDTH, TILEHEIGHT)))
+	  {
+	    gs.chars[id].fall=true;
+	  }
+	  else
+	  if ((gs.chars[id].fall) && (collide(gs.chars[id].x, gs.chars[id].y+1, TILEWIDTH, TILEHEIGHT)))
+	  {
+	    gs.chars[id].fall=false;
+	  }
+
+	  if (gs.chars[id].fall)
+	  {
+	    gs.chars[id].y++;
+	    break;
+	  }
+
+          // Check for player nearby
+          if (calcHypotenuse(Math.abs(gs.x-gs.chars[id].x), Math.abs(gs.y-gs.chars[id].y))<(TILEWIDTH*2))
+	  {
+	    if (gs.chars[id].x>gs.x)
+	      gs.chars[id].hs=-0.5;
+	    else
+	      gs.chars[id].hs=0.5;
+
+            gs.chars[id].flip=(gs.chars[id].hs<0);
+
+            nx=(gs.chars[id].x+=gs.chars[id].hs); // calculate new x position
+            if (!collide(nx, gs.chars[id].y, TILEWIDTH, TILEHEIGHT)) // Move if not blocked
+              gs.chars[id].x=nx;
+	  }
+	  else
+	  {
+            nx=(gs.chars[id].x+=gs.chars[id].hs); // calculate new x position
+            if ((collide(nx, gs.chars[id].y, TILEWIDTH, TILEHEIGHT)) || // blocked by something
+                (
+                  (!collide(nx+(gs.chars[id].flip?(TILEWIDTH/2)*-1:(TILEWIDTH)/2), gs.chars[id].y, TILEWIDTH, TILEHEIGHT)) && // not blocked forwards
+                  (!collide(nx+(gs.chars[id].flip?(TILEWIDTH/2)*-1:(TILEWIDTH)/2), gs.chars[id].y+(TILEWIDTH/2), TILEWIDTH, TILEHEIGHT)) // not blocked forwards+down (i.e. edge)
+                ))
+            {
+              // Turn around
+              gs.chars[id].hs*=-1;
+              gs.chars[id].flip=!gs.chars[id].flip;
+            }
+            else
+              gs.chars[id].x=nx;
+	  }
+        break;
+
       case TILEDRONE:
       case TILEDRONE2:
         // Check if following a path, then move to next node
@@ -1318,6 +1378,32 @@ function updatecharAI()
                   (Math.floor(gs.y/TILEHEIGHT)*gs.width)+Math.floor(gs.x/TILEWIDTH)
                   );
         }
+
+	// Check for collisions with other chars
+	for (var id2=0; id2<gs.chars.length; id2++)
+	{
+          if (overlap(gs.chars[id].x, gs.chars[id].y, TILEWIDTH, TILEHEIGHT, gs.chars[id2].x, gs.chars[id2].y, TILEWIDTH, TILEHEIGHT))
+	  {
+	    switch (gs.chars[id2].id)
+	    {
+	      case TILEELECTRIC:
+	        generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 32, 16, {r:0xff, g:0xff, b:1});
+		gs.chars[id].path=[];
+
+	        if (gs.chars[id].del==false)
+		{
+		  gs.chars[id].del=true;
+		  gs.chars[id].ttl=TARGETFPS;
+		}
+	        break;
+
+              default:
+	        break;
+	    }
+	  }
+	}
+
+	// Check for collisions with particles
         break;
 
       default:
