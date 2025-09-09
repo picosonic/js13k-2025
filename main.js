@@ -74,6 +74,7 @@ const TILEMAGNET=89;
 const TILEDRONE=112;
 const TILEDRONE2=113;
 const TILESWEEPER=114;
+const TILESWEEPERFALL=115;
 const TILEDOORLOCKTL=101;
 const TILEDOORLOCKTR=102;
 const TILEDOORTL=103;
@@ -274,7 +275,7 @@ function drawcatsprite(tileid, x, y)
 // Sort the chars so sprites are last (so they appear in front of non-solid tiles)
 function sortChars(a, b)
 {
-  const sprites=[TILEDRONE, TILEDRONE2, TILESWEEPER];
+  const sprites=[TILEDRONE, TILEDRONE2, TILESWEEPER, TILESWEEPERFALL];
 
   if (a.id!=b.id) // extra processing if they are different ids
   {
@@ -458,9 +459,10 @@ function loadlevel(level)
             break;
 
           case TILESWEEPER:
+          case TILESWEEPERFALL:
             obj.hs=(rng()<0.5)?0.5:-0.5;
             obj.flip=(obj.hs<0);
-            obj.fall=false;
+            obj.fall=(obj.id==TILESWEEPERFALL);
             gs.chars.push(obj);
             break;
 
@@ -1267,21 +1269,29 @@ function updatecharAI()
   var id2=0;
   var nx=0; // new x position
   var ny=0; // new y position
+  var ox=0; // old x position
+  var oy=0; // old y position
 
   for (id=0; id<gs.chars.length; id++)
   {
+    ox=gs.chars[id].x;
+    oy=gs.chars[id].y;
+
     switch (gs.chars[id].id)
     {
       case TILESWEEPER:
+      case TILESWEEPERFALL:
         // Check for solid ground underneath
         if ((!gs.chars[id].fall) && (!collide(gs.chars[id].x, gs.chars[id].y+1, TILEWIDTH, TILEHEIGHT)))
         {
           gs.chars[id].fall=true;
+          gs.chars[id].id=TILESWEEPERFALL;
         }
         else
         if ((gs.chars[id].fall) && (collide(gs.chars[id].x, gs.chars[id].y+1, TILEWIDTH, TILEHEIGHT)))
         {
           gs.chars[id].fall=false;
+          gs.chars[id].id=TILESWEEPER;
         }
 
         if (gs.chars[id].fall)
@@ -1299,27 +1309,21 @@ function updatecharAI()
             gs.chars[id].hs=0.5;
 
           gs.chars[id].flip=(gs.chars[id].hs<0);
+        }
 
-          nx=(gs.chars[id].x+=gs.chars[id].hs); // calculate new x position
-          if (!collide(nx, gs.chars[id].y, TILEWIDTH, TILEHEIGHT)) // Move if not blocked
-            gs.chars[id].x=nx;
+        nx=(gs.chars[id].x+=gs.chars[id].hs); // calculate new x position
+        if ((collide(nx, gs.chars[id].y, TILEWIDTH, TILEHEIGHT)) || // blocked by something
+            (
+              (!collide(nx+(gs.chars[id].flip?(TILEWIDTH/2)*-1:(TILEWIDTH)/2), gs.chars[id].y, TILEWIDTH, TILEHEIGHT)) && // not blocked forwards
+              (!collide(nx+(gs.chars[id].flip?(TILEWIDTH/2)*-1:(TILEWIDTH)/2), gs.chars[id].y+(TILEWIDTH/2), TILEWIDTH, TILEHEIGHT)) // not blocked forwards+down (i.e. edge)
+            ))
+        {
+          // Turn around
+          gs.chars[id].hs*=-1;
+          gs.chars[id].flip=!gs.chars[id].flip;
         }
         else
-        {
-          nx=(gs.chars[id].x+=gs.chars[id].hs); // calculate new x position
-          if ((collide(nx, gs.chars[id].y, TILEWIDTH, TILEHEIGHT)) || // blocked by something
-              (
-                (!collide(nx+(gs.chars[id].flip?(TILEWIDTH/2)*-1:(TILEWIDTH)/2), gs.chars[id].y, TILEWIDTH, TILEHEIGHT)) && // not blocked forwards
-                (!collide(nx+(gs.chars[id].flip?(TILEWIDTH/2)*-1:(TILEWIDTH)/2), gs.chars[id].y+(TILEWIDTH/2), TILEWIDTH, TILEHEIGHT)) // not blocked forwards+down (i.e. edge)
-              ))
-          {
-            // Turn around
-            gs.chars[id].hs*=-1;
-            gs.chars[id].flip=!gs.chars[id].flip;
-          }
-          else
-            gs.chars[id].x=nx;
-        }
+          gs.chars[id].x=nx;
 
         // Check for collisions with other chars
         for (id2=0; id2<gs.chars.length; id2++)
@@ -1332,6 +1336,7 @@ function updatecharAI()
               case TILEWATER2:
               case TILEWATER3:
               case TILEWATER4:
+              case TILESPIKES:
                 generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 16, 2, {r:0xff, g:0xff, b:1});
                 generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 8, 2, {r:0x29, g:0xad, b:0xff});
 
@@ -1433,6 +1438,14 @@ function updatecharAI()
 
       default:
         break;
+    }
+
+    // If not following a path and colliding with a tile at new position, put char back
+    if (((gs.chars[id].path==undefined) || (gs.chars[id].path.length==0)) &&
+        (collide(gs.chars[id].x, gs.chars[id].y, TILEWIDTH, TILEHEIGHT)))
+    {
+      gs.chars[id].x=ox;
+      gs.chars[id].y=oy;
     }
   }
 
