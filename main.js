@@ -869,14 +869,14 @@ function updateanimation()
         case TILEWATER4:
           gs.chars[id].anim--;
           if (gs.chars[id].anim==0)
-	  {
+          {
             gs.chars[id].id++;
 
             gs.chars[id].anim=WATERFLOW;
 
-	    if (gs.chars[id].id>TILEWATER4)
-	      gs.chars[id].id=TILEWATER;
-	  }
+            if (gs.chars[id].id>TILEWATER4)
+              gs.chars[id].id=TILEWATER;
+          }
           break;
 
         default:
@@ -1044,7 +1044,7 @@ function updateplayerchar()
           gs.key++;
 
           // Shiny
-	  generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 16, 16, {r:0xff, g:0xff, b:1});
+          generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 16, 16, {r:0xff, g:0xff, b:1});
 
           // Remove from map
           gs.chars[id].del=true;
@@ -1092,13 +1092,13 @@ function updateplayerchar()
           break;
 
         case TILELEVERON:
-	  if ((gs.leverallowed==0) && (ispressed(KEYDOWN)))
-	  {
-	    for (var id2=0; id2<gs.chars.length; id2++)
-	    {
+          if ((gs.leverallowed==0) && (ispressed(KEYDOWN)))
+          {
+            for (var id2=0; id2<gs.chars.length; id2++)
+            {
               // Remove electro
-	      if (gs.chars[id2].id==TILEELECTRIC)
-	      {
+              if (gs.chars[id2].id==TILEELECTRIC)
+              {
                 gs.chars[id2].ttl=Math.floor((gs.chars[id2].y/TILEHEIGHT)*2);
                 gs.chars[id2].del=true;
                 gs.electricity.push(JSON.parse(JSON.stringify(gs.chars[id2])));
@@ -1107,11 +1107,11 @@ function updateplayerchar()
               // Switch all levers to off
               if (gs.chars[id2].id==TILELEVERON)
                 gs.chars[id2].id=TILELEVEROFF;
-	    }
+            }
 
             // Prevent switch being flickered
             gs.leverallowed=(TARGETFPS*2);
-	  }
+          }
           break;
 
         case TILELEVEROFF:
@@ -1131,7 +1131,7 @@ function updateplayerchar()
 
               // Switch all levers to on
               for (var id3=0; id3<gs.chars.length; id3++)
-	      {
+              {
                 if (gs.chars[id3].id==TILELEVEROFF)
                   gs.chars[id3].id=TILELEVERON;
               }
@@ -1152,7 +1152,7 @@ function updateplayerchar()
           if (gs.fall)
           {
             if (gs.htime==0)
-	    {
+            {
               // Lose health (when not already hurt)
               if (gs.lives>0)
                 gs.lives-=0.5;
@@ -1166,8 +1166,8 @@ function updateplayerchar()
             gs.vs=-(gs.jumpspeed*0.75); // Fly up in the air
 
             // Splash
-	    generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 32, 32, {r:0x29, g:0xad, b:0xff});
-	    generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 32, 8, {r:0x2ff, g:0xff, b:0xff});
+            generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 32, 32, {r:0x29, g:0xad, b:0xff});
+            generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 32, 8, {r:0xff, g:0xff, b:0xff});
           }
           break;
 
@@ -1177,7 +1177,7 @@ function updateplayerchar()
             clearinputstate();
 
             if (gs.htime==0)
-	    {
+            {
               // Lose health (when not already hurt)
               if (gs.lives>0)
                 gs.lives-=0.5;
@@ -1191,7 +1191,7 @@ function updateplayerchar()
             gs.vs=-(gs.jumpspeed*0.80); // Fly up in the air
 
             // Blood
-	    generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 16, 16, {r:0xff, g:1, b:1});
+            generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 16, 16, {r:0xff, g:1, b:1});
           }
           break;
 
@@ -1202,7 +1202,7 @@ function updateplayerchar()
           if (gs.electrotimer==0)
           {
             if (gs.htime==0)
-	    {
+            {
               // Lose health (when not already hurt)
               if (gs.lives>0)
                 gs.lives-=0.5;
@@ -1225,8 +1225,8 @@ function updateplayerchar()
               gs.hs=(gs.hs>0?-(RUNSPEED*8):(RUNSPEED*8)); // Send back in the opposite direction
 
             // Electro buzz
-	    generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 16, 16, {r:0xff, g:0xff, b:1});
-	    generateparticles(gs.x+(TILECATWIDTH/2), gs.y+(TILECATHEIGHT/2), 4, 4, {});
+            generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 16, 16, {r:0xff, g:0xff, b:1});
+            generateparticles(gs.x+(TILECATWIDTH/2), gs.y+(TILECATHEIGHT/2), 4, 4, {});
           }
           break;
 
@@ -1264,6 +1264,7 @@ function findnearestchar(x, y, tileids)
 function updatecharAI()
 {
   var id=0;
+  var id2=0;
   var nx=0; // new x position
   var ny=0; // new y position
 
@@ -1272,53 +1273,81 @@ function updatecharAI()
     switch (gs.chars[id].id)
     {
       case TILESWEEPER:
-          // Check for solid ground underneath
-	  if ((!gs.chars[id].fall) && (!collide(gs.chars[id].x, gs.chars[id].y+1, TILEWIDTH, TILEHEIGHT)))
-	  {
-	    gs.chars[id].fall=true;
-	  }
-	  else
-	  if ((gs.chars[id].fall) && (collide(gs.chars[id].x, gs.chars[id].y+1, TILEWIDTH, TILEHEIGHT)))
-	  {
-	    gs.chars[id].fall=false;
-	  }
+        // Check for solid ground underneath
+        if ((!gs.chars[id].fall) && (!collide(gs.chars[id].x, gs.chars[id].y+1, TILEWIDTH, TILEHEIGHT)))
+        {
+          gs.chars[id].fall=true;
+        }
+        else
+        if ((gs.chars[id].fall) && (collide(gs.chars[id].x, gs.chars[id].y+1, TILEWIDTH, TILEHEIGHT)))
+        {
+          gs.chars[id].fall=false;
+        }
 
-	  if (gs.chars[id].fall)
-	  {
-	    gs.chars[id].y++;
-	    break;
-	  }
+        if (gs.chars[id].fall)
+        {
+          gs.chars[id].y++;
+          break;
+        }
 
-          // Check for player nearby
-          if (calcHypotenuse(Math.abs(gs.x-gs.chars[id].x), Math.abs(gs.y-gs.chars[id].y))<(TILEWIDTH*2))
-	  {
-	    if (gs.chars[id].x>gs.x)
-	      gs.chars[id].hs=-0.5;
-	    else
-	      gs.chars[id].hs=0.5;
+        // Check for player nearby
+        if (calcHypotenuse(Math.abs(gs.x-gs.chars[id].x), Math.abs(gs.y-gs.chars[id].y))<(TILEWIDTH*3))
+        {
+          if (gs.chars[id].x>gs.x)
+            gs.chars[id].hs=-0.5;
+          else
+            gs.chars[id].hs=0.5;
 
-            gs.chars[id].flip=(gs.chars[id].hs<0);
+          gs.chars[id].flip=(gs.chars[id].hs<0);
 
-            nx=(gs.chars[id].x+=gs.chars[id].hs); // calculate new x position
-            if (!collide(nx, gs.chars[id].y, TILEWIDTH, TILEHEIGHT)) // Move if not blocked
-              gs.chars[id].x=nx;
-	  }
-	  else
-	  {
-            nx=(gs.chars[id].x+=gs.chars[id].hs); // calculate new x position
-            if ((collide(nx, gs.chars[id].y, TILEWIDTH, TILEHEIGHT)) || // blocked by something
-                (
-                  (!collide(nx+(gs.chars[id].flip?(TILEWIDTH/2)*-1:(TILEWIDTH)/2), gs.chars[id].y, TILEWIDTH, TILEHEIGHT)) && // not blocked forwards
-                  (!collide(nx+(gs.chars[id].flip?(TILEWIDTH/2)*-1:(TILEWIDTH)/2), gs.chars[id].y+(TILEWIDTH/2), TILEWIDTH, TILEHEIGHT)) // not blocked forwards+down (i.e. edge)
-                ))
+          nx=(gs.chars[id].x+=gs.chars[id].hs); // calculate new x position
+          if (!collide(nx, gs.chars[id].y, TILEWIDTH, TILEHEIGHT)) // Move if not blocked
+            gs.chars[id].x=nx;
+        }
+        else
+        {
+          nx=(gs.chars[id].x+=gs.chars[id].hs); // calculate new x position
+          if ((collide(nx, gs.chars[id].y, TILEWIDTH, TILEHEIGHT)) || // blocked by something
+              (
+                (!collide(nx+(gs.chars[id].flip?(TILEWIDTH/2)*-1:(TILEWIDTH)/2), gs.chars[id].y, TILEWIDTH, TILEHEIGHT)) && // not blocked forwards
+                (!collide(nx+(gs.chars[id].flip?(TILEWIDTH/2)*-1:(TILEWIDTH)/2), gs.chars[id].y+(TILEWIDTH/2), TILEWIDTH, TILEHEIGHT)) // not blocked forwards+down (i.e. edge)
+              ))
+          {
+            // Turn around
+            gs.chars[id].hs*=-1;
+            gs.chars[id].flip=!gs.chars[id].flip;
+          }
+          else
+            gs.chars[id].x=nx;
+        }
+
+        // Check for collisions with other chars
+        for (id2=0; id2<gs.chars.length; id2++)
+        {
+          if (overlap(gs.chars[id].x, gs.chars[id].y, TILEWIDTH, TILEHEIGHT, gs.chars[id2].x, gs.chars[id2].y, TILEWIDTH, TILEHEIGHT))
+          {
+            switch (gs.chars[id2].id)
             {
-              // Turn around
-              gs.chars[id].hs*=-1;
-              gs.chars[id].flip=!gs.chars[id].flip;
+              case TILEWATER:
+              case TILEWATER2:
+              case TILEWATER3:
+              case TILEWATER4:
+                generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 16, 2, {r:0xff, g:0xff, b:1});
+                generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 8, 2, {r:0x29, g:0xad, b:0xff});
+
+                if (gs.chars[id].del==false)
+                {
+                  gs.chars[id].del=true;
+                  gs.chars[id].ttl=TARGETFPS;
+                  gs.chars[id].hs=0;
+                }
+                break;
+
+              default:
+                break;
             }
-            else
-              gs.chars[id].x=nx;
-	  }
+          }
+        }
         break;
 
       case TILEDRONE:
@@ -1371,37 +1400,35 @@ function updatecharAI()
         {
           // Not following a path
           gs.chars[id].path=pathfinder(
-                  (Math.floor(gs.chars[id].y/TILEHEIGHT)*gs.width)+Math.floor(gs.chars[id].x/TILEWIDTH)
-                  ,
-                  (Math.floor(gs.y/TILEHEIGHT)*gs.width)+Math.floor(gs.x/TILEWIDTH)
-                  );
+            (Math.floor(gs.chars[id].y/TILEHEIGHT)*gs.width)+Math.floor(gs.chars[id].x/TILEWIDTH)
+            ,
+            (Math.floor(gs.y/TILEHEIGHT)*gs.width)+Math.floor(gs.x/TILEWIDTH)
+            );
         }
 
-	// Check for collisions with other chars
-	for (var id2=0; id2<gs.chars.length; id2++)
-	{
+        // Check for collisions with other chars
+        for (id2=0; id2<gs.chars.length; id2++)
+        {
           if (overlap(gs.chars[id].x, gs.chars[id].y, TILEWIDTH, TILEHEIGHT, gs.chars[id2].x, gs.chars[id2].y, TILEWIDTH, TILEHEIGHT))
-	  {
-	    switch (gs.chars[id2].id)
-	    {
-	      case TILEELECTRIC:
-	        generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 32, 16, {r:0xff, g:0xff, b:1});
-		gs.chars[id].path=[];
+          {
+            switch (gs.chars[id2].id)
+            {
+              case TILEELECTRIC:
+                generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 32, 16, {r:0xff, g:0xff, b:1});
+                gs.chars[id].path=[];
 
-	        if (gs.chars[id].del==false)
-		{
-		  gs.chars[id].del=true;
-		  gs.chars[id].ttl=TARGETFPS;
-		}
-	        break;
+                if (gs.chars[id].del==false)
+                {
+                  gs.chars[id].del=true;
+                  gs.chars[id].ttl=TARGETFPS;
+                }
+                break;
 
               default:
-	        break;
-	    }
-	  }
-	}
-
-	// Check for collisions with particles
+                break;
+            }
+          }
+        }
         break;
 
       default:
