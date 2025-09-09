@@ -164,3 +164,9 @@ Fixed issue when ziplining over a close block the zipline could drop
 Fixed issue with jump on AZERTY keyboards
 
 Allow levers to turn on/off electricity, and make all levers be in sync
+
+Added sweeper, who patrols until it sees the player
+
+Allow drone to be removed with electricity
+
+Allow sweeper to fall of edges when chasing player
