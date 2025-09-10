@@ -204,3 +204,7 @@ Ensure a minimum time is waited before skipping door and lever timers
 Added dwell time for sprites with paths, to prevent overrun
 
 Test for level being completed using criteria added
+
+Support gamepad in intro and endgame animations
+
+Enemies now hurt when you touch them

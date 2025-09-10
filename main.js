@@ -1305,6 +1305,30 @@ function updateplayerchar()
           }
           break;
 
+        case TILESWEEPER:
+        case TILESWEEPERFALL:
+          if (gs.htime==0)
+          {
+              // Lose health (when not already hurt)
+              if (gs.lives>0)
+                gs.lives-=0.5;
+
+            gs.htime=(TARGETFPS*5);
+          }
+          break;
+
+        case TILEDRONE:
+        case TILEDRONE2:
+          if (gs.htime==0)
+          {
+              // Lose health (when not already hurt)
+              if (gs.lives>0)
+                gs.lives-=0.5;
+
+            gs.htime=(TARGETFPS*5);
+          }
+          break;
+
         default:
           break;
       }
