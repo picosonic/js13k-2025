@@ -70,6 +70,7 @@ const TILEKEY=66;
 const TILELEVERON=73;
 const TILELEVEROFF=74;
 const TILESPIKES=75;
+const TILEFINISH=76;
 const TILECLOUD=81;
 const TILEELECTRIC=83;
 const TILESTAR=88;
@@ -1308,6 +1309,9 @@ function updateplayerchar()
           if (gs.lives<MAXLIVES)
             gs.lives+=0.5;
 
+          // Heart explosion
+          generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 16, 16, {r:0xff, g:1, b:1});
+
           // Remove from map
           gs.chars[id].del=true;
           break;
@@ -1679,8 +1683,10 @@ function islevelcompleted()
   //   no stars
   //   no drones
   //   no sweepers
+  //   standing on fimish point
 
-  return (countchars([TILESTAR, TILEDRONE, TILEDRONE2, TILESWEEPER, TILESWEEPERFALL])==0);
+  return ((countchars([TILESTAR, TILEDRONE, TILEDRONE2, TILESWEEPER, TILESWEEPERFALL])==0) &&
+          ((playerlook(gs.x, gs.y+1)-1)==TILEFINISH));
 }
 
 // Scroll level to player
