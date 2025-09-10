@@ -188,3 +188,11 @@ Drone avoids electricity unless hunting player so that it doesn't self-terminate
 Resized tilemap, removing some unused tiles to save a few bytes
 
 Added saving/restoring of progress
+
+10th September
+--------------
+Noticed using doors can be a bit slow, as it uses timeouts. Changed so that if no input is detected whilst timer is running it skips the wait
+
+Draw numbers using tiles - for showing score
+
+Add to score when enemies removed

@@ -90,6 +90,16 @@ const TILEDOORLOCKL=116;
 const TILEDOORLOCKR=117;
 const TILEDOORL=118;
 const TILEDOORR=119;
+const TILENUM0=120;
+const TILENUM1=121;
+const TILENUM2=122;
+const TILENUM3=123;
+const TILENUM4=124;
+const TILENUM5=125;
+const TILENUM6=126;
+const TILENUM7=127;
+const TILENUM8=128;
+const TILENUM9=129;
 const TILECAT=131;
 const TILEHEART=132;
 const TILEHALFHEART=133;
@@ -278,6 +288,24 @@ function drawcatsprite(tileid, x, y)
       Math.floor(x)-gs.xoffset, Math.floor(y)-gs.yoffset, TILECATWIDTH, TILECATHEIGHT);
   else
     gs.ctx.drawImage(gs.tilemapcat, (tileid*TILECATWIDTH) % (TILESCATPERROW*TILECATWIDTH), Math.floor((tileid*TILECATWIDTH) / (TILESCATPERROW*TILECATWIDTH))*TILECATHEIGHT, TILECATWIDTH, TILECATHEIGHT, Math.floor(x)-gs.xoffset, Math.floor(y)-gs.yoffset, TILECATWIDTH, TILECATHEIGHT);
+}
+
+// Draw number using tiles
+function drawnumber(x, y, number)
+{
+  const numstr=number.toString();
+
+  // Iterate through characters to write
+  for (var i=0; i<numstr.length; i++)
+  {
+    var offs=numstr.charCodeAt(i)-0x30;
+
+    // Don't try to draw characters outside our font set
+    if ((offs<0) || (offs>9))
+      continue;
+
+    drawtile(offs+TILENUM0, x+(i*TILEWIDTH), y);
+  }
 }
 
 // Sort the chars so sprites are last (so they appear in front of non-solid tiles)
@@ -1534,7 +1562,22 @@ function updatecharAI()
         gs.chars[id].ttl--;
 
       if (gs.chars[id].ttl==0)
+      {
+        switch (gs.chars[id].id)
+        {
+          case TILEDRONE:
+          case TILEDRONE2:
+          case TILESWEEPER:
+          case TILESWEEPERFALL:
+            gs.score+=10;
+            break;
+
+          default:
+            break;
+        }
+
         gs.chars.splice(id, 1);
+      }
     }
   }
 }
@@ -1681,6 +1724,9 @@ function redraw()
 
   // Draw any strings
   drawstrings();
+
+  if (gs.score>0)
+    drawnumber(10+gs.xoffset, 10+gs.yoffset, gs.score);
 }
 
 // Request animation frame callback
