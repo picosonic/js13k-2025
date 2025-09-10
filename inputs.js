@@ -84,6 +84,15 @@ function updatekeystate(e, dir)
       e.preventDefault();
       break;
 
+    case "Escape": // escape (go back to menu)
+      // TODO
+      e.preventDefault();
+      break;
+
+    case "Slash": // forward slash (prevent search popup)
+      e.preventDefault();
+      break;
+
     default:
       break;
   }
