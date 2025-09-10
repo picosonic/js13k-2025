@@ -87,6 +87,9 @@ const TILEWATER=105;
 const TILEWATER2=106;
 const TILEWATER3=107;
 const TILEWATER4=108;
+const TILEDEATH=109;
+const TILEDEATH2=110;
+const TILEDEATH3=111;
 const TILEDOORLOCKL=116;
 const TILEDOORLOCKR=117;
 const TILEDOORL=118;
@@ -272,11 +275,33 @@ function drawsprite(sprite)
       ((Math.floor(sprite.y)-gs.yoffset)>YMAX))   // clip bottom
     return;
 
+  var drawid=sprite.id;
+  switch (sprite.id)
+  {
+    case TILESWEEPER:
+    case TILESWEEPERFALL:
+    case TILEDRONE:
+    case TILEDRONE2:
+      if (sprite.ttl>0)
+      {
+        if (sprite.ttl>=(TARGETFPS*0.66))
+          drawid=TILEDEATH;
+        else if (sprite.ttl>=(TARGETFPS*0.33))
+          drawid=TILEDEATH2;
+        else
+          drawid=TILEDEATH3;
+      }
+      break;
+
+    default:
+      break;
+  }
+
   if (sprite.flip)
-    gs.ctx.drawImage(gs.tilemapflip, ((TILESPERROW*TILEWIDTH2)-((sprite.id*TILEWIDTH2) % (TILESPERROW*TILEWIDTH2)))-TILEWIDTH2, Math.floor((sprite.id*TILEWIDTH2) / (TILESPERROW*TILEWIDTH2))*TILEHEIGHT2, TILEWIDTH2, TILEHEIGHT2,
+    gs.ctx.drawImage(gs.tilemapflip, ((TILESPERROW*TILEWIDTH2)-((drawid*TILEWIDTH2) % (TILESPERROW*TILEWIDTH2)))-TILEWIDTH2, Math.floor((drawid*TILEWIDTH2) / (TILESPERROW*TILEWIDTH2))*TILEHEIGHT2, TILEWIDTH2, TILEHEIGHT2,
       Math.floor(sprite.x)-gs.xoffset, Math.floor(sprite.y)-gs.yoffset, TILEWIDTH, TILEHEIGHT);
   else
-    gs.ctx.drawImage(gs.tilemap, (sprite.id*TILEWIDTH2) % (TILESPERROW*TILEWIDTH2), Math.floor((sprite.id*TILEWIDTH2) / (TILESPERROW*TILEWIDTH2))*TILEHEIGHT2, TILEWIDTH2, TILEHEIGHT2,
+    gs.ctx.drawImage(gs.tilemap, (drawid*TILEWIDTH2) % (TILESPERROW*TILEWIDTH2), Math.floor((drawid*TILEWIDTH2) / (TILESPERROW*TILEWIDTH2))*TILEHEIGHT2, TILEWIDTH2, TILEHEIGHT2,
       Math.floor(sprite.x)-gs.xoffset, Math.floor(sprite.y)-gs.yoffset, TILEWIDTH, TILEHEIGHT);
 }
 
@@ -1298,7 +1323,7 @@ function updateplayerchar()
               gs.hs=(gs.hs>0?-(RUNSPEED*8):(RUNSPEED*8)); // Send back in the opposite direction
 
             // Electro buzz
-            generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 16, 16, {r:0xff, g:0xff, b:1});
+            generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 16, 1, {r:0xff, g:0xff, b:1});
             generateparticles(gs.x+(TILECATWIDTH/2), gs.y+(TILECATHEIGHT/2), 4, 4, {});
           }
           break;
@@ -1518,7 +1543,7 @@ function updatecharAI()
             if (gs.chars[id].path.length==0)
             {
               // Path completed so wait a bit
-              gs.chars[id].dwell=(1*TARGETFPS);
+              gs.chars[id].dwell=Math.floor(TARGETFPS/2);
 
               // Set a null destination
               gs.chars[id].dx=-1;
@@ -1575,7 +1600,7 @@ function updatecharAI()
           if (gs.chars[id].path.length==0)
           {
             gs.chars[id].seenplayer=false;
-            gs.chars[id].dwell=(1*TARGETFPS);
+            gs.chars[id].dwell=Math.floor(TARGETFPS/2);
           }
         }
 
@@ -1589,7 +1614,7 @@ function updatecharAI()
               case TILEELECTRIC:
                 if (gs.chars[id].seenplayer)
                 {
-                  generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 32, 16, {r:0xff, g:0xff, b:1});
+                  generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 32, 2, {r:0xff, g:0xff, b:1});
                   gs.chars[id].path=[];
 
                   if (gs.chars[id].del==false)
