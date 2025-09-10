@@ -1876,6 +1876,14 @@ function endgame(percent)
   if (gs.state!=STATECOMPLETE)
     return;
 
+  // Gamepad support
+  try
+  {
+    if (!!(navigator.getGamepads))
+      gamepadscan();
+  }
+  catch(e){}
+
   // Check if done or control key/gamepad pressed
   if ((percent>=98) || (gs.keystate!=KEYNONE) || (gs.padstate!=KEYNONE))
   {
@@ -1905,6 +1913,14 @@ function draweyes()
 // Intro animation
 function intro(percent)
 {
+  // Gamepad support
+  try
+  {
+    if (!!(navigator.getGamepads))
+      gamepadscan();
+  }
+  catch(e){}
+
   // Check if done or control key/gamepad pressed
   if (percent>=98)
   {
