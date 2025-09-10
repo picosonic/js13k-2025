@@ -1024,7 +1024,14 @@ function updatemovements()
   if (gs.htime>0) gs.htime--;
 
   // Decrease door timer
-  if (gs.doortimer>0) gs.doortimer--;
+  if (gs.doortimer>0)
+  {
+    gs.doortimer--;
+
+    // Skip timer if no input detected
+    if ((gs.keystate==KEYNONE) && (gs.padstate==KEYNONE))
+      doortimer=0;
+  }
 
   // Check for electro timer
   if (gs.electrotimer>0) gs.electrotimer--;
