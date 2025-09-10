@@ -1726,7 +1726,7 @@ function redraw()
   drawstrings();
 
   if (gs.score>0)
-    drawnumber(10+gs.xoffset, 10+gs.yoffset, gs.score);
+    drawnumber((XMAX-((gs.score.toString().length)*TILEWIDTH)-5)+gs.xoffset, 5+gs.yoffset, gs.score);
 }
 
 // Request animation frame callback
