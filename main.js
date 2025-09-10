@@ -624,7 +624,7 @@ function drawlives()
   for (var i=0; i<Math.ceil(MAXLIVES); i++)
   {
     var px=((i+0.5)*TILEWIDTH)+gs.xoffset;
-    var py=(TILEHEIGHT/2)+gs.yoffset;
+    var py=5+gs.yoffset;
 
     if (i<whole)
       drawsprite({id:TILEHEART, x:px, y:py, flip:false});
@@ -1057,7 +1057,7 @@ function updatemovements()
     gs.doortimer--;
 
     // Skip timer if no input detected
-    if ((gs.keystate==KEYNONE) && (gs.padstate==KEYNONE))
+    if ((gs.doortimer<(TARGETFPS/2)) && (gs.keystate==KEYNONE) && (gs.padstate==KEYNONE))
       gs.doortimer=0;
   }
 
@@ -1065,7 +1065,13 @@ function updatemovements()
   if (gs.electrotimer>0) gs.electrotimer--;
 
   // Check for electro lever being allowed
-  if (gs.leverallowed>0) gs.leverallowed--;
+  if (gs.leverallowed>0)
+  {
+    gs.leverallowed--;
+
+    if ((gs.leverallowed<(TARGETFPS/2)) && (gs.keystate==KEYNONE) && (gs.padstate==KEYNONE))
+      gs.leverallowed=0;
+  }
 
   // Update any animation frames
   updateanimation();
@@ -1155,9 +1161,6 @@ function updateplayerchar()
           // Check for using this door
           if ((gs.doortimer==0) && (ispressed(KEYDOWN)))
           {
-            // Prevent double press
-            clearinputstate();
-
             // Try to go through this door
             usedoor(gs.chars[id].x, gs.chars[id].y);
           }
@@ -1716,15 +1719,16 @@ function redraw()
   if ((gs.htime==0) || ((gs.htime%7)<=4)) // Flash when hurt
     drawcatsprite(gs.tileid, gs.x, playerlook(gs.x, gs.y+1)-1==TILESPRINGUP?gs.y+8:gs.y);
 
-  // Draw hearts left
-  drawlives();
-
   // Draw the particles
   drawparticles();
 
   // Draw any strings
   drawstrings();
 
+  // Draw hearts left
+  drawlives();
+
+  // Draw the score
   if (gs.score>0)
     drawnumber((XMAX-((gs.score.toString().length)*TILEWIDTH)-5)+gs.xoffset, 5+gs.yoffset, gs.score);
 }
