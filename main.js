@@ -1030,7 +1030,7 @@ function updatemovements()
 
     // Skip timer if no input detected
     if ((gs.keystate==KEYNONE) && (gs.padstate==KEYNONE))
-      doortimer=0;
+      gs.doortimer=0;
   }
 
   // Check for electro timer
