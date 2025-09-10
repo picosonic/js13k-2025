@@ -435,7 +435,7 @@ function loadlevel(level)
 
       if (tile!=0)
       {
-        var obj={id:(tile-1), x:(x*TILEWIDTH), y:(y*TILEHEIGHT), flip:false, hs:0, vs:0, del:false, ttl:0};
+        var obj={id:(tile-1), x:(x*TILEWIDTH), y:(y*TILEHEIGHT), flip:false, hs:0, vs:0, dwell:0, del:false, ttl:0};
 
         switch (tile-1)
         {
@@ -1336,6 +1336,17 @@ function findnearestchar(x, y, tileids)
   return charid;
 }
 
+function countchars(tileids)
+{
+  var found=0;
+
+  for (var id=0; id<gs.chars.length; id++)
+    if (tileids.includes(gs.chars[id].id))
+      found++;
+
+  return found;
+}
+
 function updatecharAI()
 {
   var id=0;
@@ -1354,6 +1365,14 @@ function updatecharAI()
     {
       case TILESWEEPER:
       case TILESWEEPERFALL:
+        // Check if dwelling
+        if (gs.chars[id].dwell>0)
+        {
+          gs.chars[id].dwell--;
+
+          continue;
+        }
+
         // Check for solid ground underneath
         if ((!gs.chars[id].fall) && (!collide(gs.chars[id].x, gs.chars[id].y+1, TILEWIDTH, TILEHEIGHT)))
         {
@@ -1430,6 +1449,14 @@ function updatecharAI()
 
       case TILEDRONE:
       case TILEDRONE2:
+        // Check if dwelling
+        if (gs.chars[id].dwell>0)
+        {
+          gs.chars[id].dwell--;
+
+          continue;
+        }
+
         if (calcHypotenuse(Math.abs(gs.x-gs.chars[id].x), Math.abs(gs.y-gs.chars[id].y))<(TILEWIDTH*4))
         {
           if (gs.chars[id].seenplayer==false)
@@ -1455,6 +1482,9 @@ function updatecharAI()
             // Check for being at end of path
             if (gs.chars[id].path.length==0)
             {
+              // Path completed so wait a bit
+              gs.chars[id].dwell=(1*TARGETFPS);
+
               // Set a null destination
               gs.chars[id].dx=-1;
               gs.chars[id].dy=-1;
@@ -1505,6 +1535,13 @@ function updatecharAI()
             ,
             (ny*gs.width)+nx
             );
+
+          // If we can't find a path then dwell for a bit, before going back into patrol
+          if (gs.chars[id].path.length==0)
+          {
+            gs.chars[id].seenplayer=false;
+            gs.chars[id].dwell=(1*TARGETFPS);
+          }
         }
 
         // Check for collisions with other chars
@@ -1608,9 +1645,11 @@ function update()
 function islevelcompleted()
 {
   // This is defined as ..
-  //   TODO
+  //   no stars
+  //   no drones
+  //   no sweepers
 
-  return (false);
+  return (countchars([TILESTAR, TILEDRONE, TILEDRONE2, TILESWEEPER, TILESWEEPERFALL])==0);
 }
 
 // Scroll level to player
