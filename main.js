@@ -423,9 +423,6 @@ function loadlevel(level)
   gs.electricity=[];
   gs.leverallowed=0;
 
-  // Reset score
-  gs.score=0;
-
   // Populate chars (non solid tiles)
   for (var y=0; y<gs.height; y++)
   {
@@ -1303,6 +1300,16 @@ function updateplayerchar()
             generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 16, 16, {r:0xff, g:0xff, b:1});
             generateparticles(gs.x+(TILECATWIDTH/2), gs.y+(TILECATHEIGHT/2), 4, 4, {});
           }
+          break;
+
+        case TILEHEART:
+          gs.htime=0; // heal
+
+          if (gs.lives<MAXLIVES)
+            gs.lives+=0.5;
+
+          // Remove from map
+          gs.chars[id].del=true;
           break;
 
         case TILESWEEPER:
