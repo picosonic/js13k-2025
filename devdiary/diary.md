@@ -196,3 +196,11 @@ Noticed using doors can be a bit slow, as it uses timeouts. Changed so that if n
 Draw numbers using tiles - for showing score
 
 Add to score when enemies removed
+
+Tweak UI positions, draw lives above strings
+
+Ensure a minimum time is waited before skipping door and lever timers
+
+Added dwell time for sprites with paths, to prevent overrun
+
+Test for level being completed using criteria added
