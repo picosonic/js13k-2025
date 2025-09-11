@@ -234,3 +234,13 @@ Only call "playing" RAF function, while still playing state
 Added a basic game-completed screen
 
 Added level hints when starting each level, introducing the gameplay gradually, shown as popup toast message boxes
+
+Reduce issues when inputs held between state transitions
+
+Fixed overlapping RAF when starting new levels issue
+
+Fixed icon issue on level 6 hint
+
+Set minimum view time for into/end to 20% of animation - looks like jerky
+
+Fleshed out congrats screen at end of game

@@ -456,7 +456,7 @@ function loadlevel(level)
   // Work out where all the door pairs are
   loaddoors(levels[gs.level].doors);
 
-  // Start with no electricity turned off
+  // Start with no electricity turned off, levers allowed and normal pace
   gs.electricity=[];
   gs.leverallowed=0;
 
@@ -2003,6 +2003,9 @@ function rafcallback(timestamp)
         // End of game
         gs.state=STATECOMPLETE;
 
+        // Reduce issues when inputs held
+        clearinputstate();
+
         gs.timeline.reset().add(10*1000, undefined).addcallback(endgame).begin(0);
       }
       else
@@ -2034,14 +2037,32 @@ function newlevel(level)
   gs.timeline.end().reset();
   gs.timeline=new timelineobj();
 
+  gs.state=STATENEWLEVEL;
+
   // Clear any messageboxes left on screen
   gs.msgqueue=[];
   gs.msgboxtime=0;
 
-  gs.level=level;
-  gs.state=STATEPLAYING;
-  loadlevel(gs.level);
-  window.requestAnimationFrame(rafcallback);
+  // Reduce held inputs causing issues
+  clearinputstate();
+
+  // Set up a timeline to display level details
+  gs.timeline.add(0, function()
+  {
+    // Advance to next level
+    gs.level=level;
+
+    // Clear canvas
+    gs.ctx.clearRect(0, 0, gs.canvas.width, gs.canvas.height);
+  
+    // Write level title
+    write(gs.ctx, (XMAX/2)-((Math.floor(levels[gs.level].title.length/2)*FONTWIDTH)*2), 40, levels[gs.level].title, 2, {r:255, g:255, b:255});
+  }).add(2*1000, function()
+  {
+    gs.state=STATEPLAYING;
+    loadlevel(gs.level);
+    window.requestAnimationFrame(rafcallback);
+  });
 
   // Add hints depending on level
   switch (level)
@@ -2058,7 +2079,7 @@ function newlevel(level)
       break;
 
     case 2:
-      hints.push("["+TILEWATER+"]Mochi hates water",
+      hints.push("["+TILEWATER+"]Mochi hates bathtime",
         "["+TILEHEART+"]Collect hearts to heal");
       break;
 
@@ -2077,7 +2098,7 @@ function newlevel(level)
       break;
 
     case 6:
-      hints.push("["+TILEDRONE+"Defeat the drones");
+      hints.push("["+TILEDRONE+"]Defeat the drones");
       break;
 
     case 7:
@@ -2092,6 +2113,8 @@ function newlevel(level)
   // Queue up all the hints as message boxes one after the other
   for (var n=0; n<hints.length; n++)
     showmessagebox(hints[n], 3*TARGETFPS);
+
+  gs.timeline.begin();
 }
 
 function resettointro()
@@ -2114,7 +2137,7 @@ function endgame(percent)
   catch(e){}
 
   // Check if done or control key/gamepad pressed
-  if ((percent>=98) || (gs.keystate!=KEYNONE) || (gs.padstate!=KEYNONE))
+  if ((percent>=98) || (((gs.keystate!=KEYNONE) || (gs.padstate!=KEYNONE)) && (percent>=20)))
   {
     gs.state=STATEINTRO;
     gs.ctx.clearRect(0, 0, gs.canvas.width, gs.canvas.height);
@@ -2123,9 +2146,13 @@ function endgame(percent)
   else
   {
     gs.ctx.clearRect(0, 0, gs.canvas.width, gs.canvas.height);
-    write(gs.ctx, 30, 30, "CONGRATULATIONS", 3, {r:255, g:191, b:0});
 
-    // TODO
+    write(gs.ctx, 30, 40, "CONGRATULATIONS", 3, {r:0, g:255, b:255});
+    write(gs.ctx, 30, 70, "MOCHI", 3, {r:255, g:0, b:255});
+    write(gs.ctx, 30, 100, "ESCAPED", 3, {r:239, g:255, b:0});
+
+    write(gs.ctx, 30, 150, "SCORE", 2, {r:255, g:255, b:255});
+    drawnumber(100+gs.xoffset, 149+gs.yoffset, gs.score);
   }
 }
 
@@ -2162,8 +2189,13 @@ function intro(percent)
     setTimeout(resettointro, 3*1000);
   }
   else
-  if ((gs.keystate!=KEYNONE) || (gs.padstate!=KEYNONE))
+  if (((gs.keystate!=KEYNONE) || (gs.padstate!=KEYNONE)) && (percent>20))
   {
+    gs.timeline.end();
+
+    gs.score=0;
+    gs.lives=MAXLIVES;
+
     newlevel(0);
   }
   else
