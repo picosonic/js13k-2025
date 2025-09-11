@@ -2061,25 +2061,25 @@ function newlevel(level)
         "["+TILEHEART+"]Collect hearts to heal");
       break;
 
-    case 2:
+    case 3:
       hints.push("["+TILESPIKES+"]Careful of the spikes",
         "["+TILEMAGNET+"]Jump to magnets\nto use ziplines");
       break;
 
-    case 3:
+    case 4:
       hints.push("["+TILELEVERON+"]Control electricy\nwith levers",
         "["+TILELEVEROFF+"]Press down on a lever\nto use it");
       break;
 
-    case 4:
+    case 5:
       hints.push("["+TILESWEEPER+"]Defeat the sweepers\nlure them to hazards");
       break;
 
-    case 5:
+    case 6:
       hints.push("["+TILEDRONE+"Defeat the drones");
       break;
 
-    case 6:
+    case 7:
       hints.push("["+TILEKEY+"]Find a key to\nunlock the doors",
         "["+TILEPADLOCK+"]Press down to unlock\nand enter doors");
       break;
