@@ -212,3 +212,5 @@ Enemies now hurt when you touch them
 Hearts give you life when collected
 
 Created small and large poster images for the game using a mix of AI and GIMP
+
+Drone death animation
