@@ -214,3 +214,21 @@ Hearts give you life when collected
 Created small and large poster images for the game using a mix of AI and GIMP
 
 Drone death animation
+
+11th September
+--------------
+Removed debug FPS calculation as I wasn't using it
+
+Removed strings renderer as I also wasn't using that
+
+Added popup messageboxes (shown like toast) at bottom right, for general information, hints, e.t.c.
+
+Current level is added to savedata
+
+Added tiny 8x8 JS13k icon
+
+Updated tile constants
+
+Only call "playing" RAF function, while still playing state
+
+Added a basic game-completed screen
