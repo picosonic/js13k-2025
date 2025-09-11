@@ -232,3 +232,5 @@ Updated tile constants
 Only call "playing" RAF function, while still playing state
 
 Added a basic game-completed screen
+
+Added level hints when starting each level, introducing the gameplay gradually, shown as popup toast message boxes
