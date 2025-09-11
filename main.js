@@ -64,9 +64,10 @@ const CATFALL=CATRUN2;
 
 // Tile ids
 const TILENONE=0;
-const TILESPRINGUP=30;
 const TILESPRINGDOWN=15;
+const TILESPRINGUP=30;
 const TILEKEY=66;
+const TILEPADLOCK=67;
 const TILELEVERON=73;
 const TILELEVEROFF=74;
 const TILESPIKES=75;
@@ -75,10 +76,16 @@ const TILECLOUD=81;
 const TILEELECTRIC=83;
 const TILESTAR=88;
 const TILEMAGNET=89;
-const TILEDRONE=112;
-const TILEDRONE2=113;
-const TILESWEEPER=114;
-const TILESWEEPERFALL=115;
+// const TILEr=90;
+// const TILEr_WALK=91;
+// const TILEr_WALK2=92;
+// const TILEr_SPLAT=93;
+// const TILEr_POP=94;
+// const TILEb=95;
+// const TILEb_WALK=96;
+// const TILEb_WALK2=97;
+// const TILEb_SPLAT=98;
+// const TILEb_POP=99;
 const TILEDOORLOCKTL=101;
 const TILEDOORLOCKTR=102;
 const TILEDOORTL=103;
@@ -90,6 +97,10 @@ const TILEWATER4=108;
 const TILEDEATH=109;
 const TILEDEATH2=110;
 const TILEDEATH3=111;
+const TILEDRONE=112;
+const TILEDRONE2=113;
+const TILESWEEPER=114;
+const TILESWEEPERFALL=115;
 const TILEDOORLOCKL=116;
 const TILEDOORLOCKR=117;
 const TILEDOORL=118;
@@ -104,6 +115,7 @@ const TILENUM6=126;
 const TILENUM7=127;
 const TILENUM8=128;
 const TILENUM9=129;
+const TILEJS13K=130;
 const TILECAT=131;
 const TILEHEART=132;
 const TILEHALFHEART=133;
@@ -206,11 +218,10 @@ var gs={
   // Timeline for animation
   timeline:new timelineobj(), // timeline for general animation
 
-  // Array of strings to draw
-  strings:[],
-
-  // Debug flag
-  debug:false
+  // Messagebox popup
+  msgboxtext:"", // text to show in current messagebox
+  msgboxtime:0, // timer for showing current messagebox
+  msgqueue:[] // Message box queue
 };
 
 // Random number generator
@@ -611,6 +622,130 @@ function drawparallax()
 {
   for (var i=0; i<gs.parallax.length; i++)
     drawtile(TILECLOUD+gs.parallax[i].t, gs.parallax[i].x-Math.floor(gs.xoffset/gs.parallax[i].z), gs.parallax[i].y-Math.floor(gs.yoffset/gs.parallax[i].z));
+}
+
+// https://stackoverflow.com/questions/1255512/how-to-draw-a-rounded-rectangle-using-html-canvas
+CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r)
+{
+  if (w<(2*r)) r=w/2;
+  if (h<(2*r)) r=h/2;
+
+  this.beginPath();
+  this.moveTo(Number(x+r), y);
+  this.arcTo(x+w, y,   x+w, y+h, Number(r));
+  this.arcTo(x+w, y+h, x,   y+h, Number(r));
+  this.arcTo(x,   y+h, x,   y,   Number(r));
+  this.arcTo(x,   y,   x+w, y,   Number(r));
+  this.closePath();
+};
+
+// Draw messagebox if required
+function drawmsgbox()
+{
+  if (gs.msgboxtime>0)
+  {
+    var i;
+    var width=0;
+    var height=0;
+    var top=0;
+    var icon=-1;
+    const boxborder=1;
+    var px,py=0; // Position to draw at
+
+    // Draw box //
+    // Split on \n
+    const txtlines=gs.msgboxtext.split("\n");
+
+    // Determine width (length of longest string + border)
+    for (i=0; i<txtlines.length; i++)
+    {
+      // Check for and remove icon from first line
+      if ((i==0) && (txtlines[i].indexOf("[")==0))
+      {
+        var endbracket=txtlines[i].indexOf("]");
+        if (endbracket!=-1)
+        {
+          icon=parseInt(txtlines[i].substring(1, endbracket), 10);
+          txtlines[i]=txtlines[i].substring(endbracket+1);
+        }
+      }
+
+      if (txtlines[i].length>width)
+        width=txtlines[i].length;
+    }
+
+    width+=(boxborder*2);
+
+    // Determine height (number of lines + border)
+    height=txtlines.length+(boxborder*2);
+
+    // Convert width/height into pixels
+    width*=FONTWIDTH;
+    height*=(FONTHEIGHT+1);
+
+    // Add space if sprite is to be drawn
+    if (icon!=-1)
+    {
+      // Check for centering text when only one line and icon pads height
+      if (txtlines.length==1)
+        top=0.5;
+    
+      width+=(TILEWIDTH+(FONTWIDTH*2));
+
+      if (height<(TILEHEIGHT+(2*FONTHEIGHT)))
+        height=TILEHEIGHT+(2*FONTHEIGHT);
+    }
+
+    // Roll-up
+    if (gs.msgboxtime<8)
+      height=Math.floor(height*(gs.msgboxtime/8));
+
+    px=XMAX-width;
+    py=YMAX-height-FONTHEIGHT;
+
+    // Draw box
+    gs.ctx.fillStyle="rgba(255,255,255,0.75)";
+    gs.ctx.strokeStyle="rgba(0,0,0,0)";
+    gs.ctx.roundRect(px-(boxborder*FONTWIDTH), py, width, height, FONTWIDTH);
+    gs.ctx.fill();
+
+    if (gs.msgboxtime>=8)
+    {
+      // Draw optional sprite
+      if (icon!=-1)
+        drawsprite({id:icon, x:(px)+gs.xoffset, y:py+((boxborder*2)*FONTHEIGHT)-FONTHEIGHT+gs.yoffset, flip:false});
+
+      // Draw text //
+      for (i=0; i<txtlines.length; i++)
+        write(gs.ctx, px+(icon==-1?0:TILEWIDTH+FONTWIDTH), py+((i+(boxborder*2)+top)*(FONTHEIGHT+1))-FONTHEIGHT, txtlines[i], 1, {r:0, b:0, g:0});
+    }
+
+    gs.msgboxtime--;
+  }
+  else
+  {
+    // Check if there are any message boxes queued up
+    if ((gs.state==STATEPLAYING) && (gs.msgqueue.length>0))
+    {
+      showmessagebox(gs.msgqueue[0].text, gs.msgqueue[0].duration);
+      gs.msgqueue.shift();
+    }
+  }  
+}
+
+// Show messsage box
+function showmessagebox(text, timing)
+{
+  if ((gs.msgboxtime==0) && (gs.state==STATEPLAYING))
+  {
+    // Set text to display
+    gs.msgboxtext=text;
+
+    // Set time to display messagebox
+    gs.msgboxtime=timing;
+  }
+  else
+    gs.msgqueue.push({text:text, duration:timing});
 }
 
 function drawziplines()
@@ -1765,22 +1900,6 @@ function scrolltoplayer(dampened)
   }
 }
 
-function drawstrings()
-{
-  for (var i=0; i<gs.strings.length; i++)
-  {
-    write(gs.ctx, gs.strings[i].x, gs.strings[i].y,
-      gs.strings[i].text, gs.strings[i].scale, gs.strings[i].rgb);
-  }
-}
-
-function addstring(x, y, text, scale, rgb)
-{
-  gs.strings.push({x:x, y:y, text:text, scale:scale, rgb:rgb});
-
-  return gs.strings.length;
-}
-
 // Redraw game frame
 function redraw()
 {
@@ -1823,11 +1942,11 @@ function redraw()
   // Draw the particles
   drawparticles();
 
-  // Draw any strings
-  drawstrings();
-
   // Draw hearts left
   drawlives();
+
+  // Draw any visible messagebox
+  drawmsgbox();
 
   // Draw the score
   if (gs.score>0)
@@ -1837,16 +1956,6 @@ function redraw()
 // Request animation frame callback
 function rafcallback(timestamp)
 {
-  if (gs.debug)
-  {
-    // Calculate FPS
-    while ((gs.frametimes.length>0) && (gs.frametimes[0]<=(timestamp-1000)))
-      gs.frametimes.shift(); // Remove all entries older than a second
-
-    gs.frametimes.push(timestamp); // Add current time
-    gs.fps=gs.frametimes.length; // FPS = length of times in array
-  }
-
   // First time round, just save epoch
   if (gs.lasttime>0)
   {
@@ -1884,7 +1993,7 @@ function rafcallback(timestamp)
 
       try
       {
-        window.localStorage.setItem('mochimidnightescape', JSON.stringify({score:gs.score, completed:gs.completed}));
+        window.localStorage.setItem('mochimidnightescape', JSON.stringify({score:gs.score, level:gs.level, completed:gs.completed}));
       }
       catch (e){}
 
@@ -1907,13 +2016,16 @@ function rafcallback(timestamp)
   // Remember when we were last called
   gs.lasttime=timestamp;
 
-  // Request we are called on the next frame
-  window.requestAnimationFrame(rafcallback);
+  // Request we are called on the next frame, but only if still playing
+  if (gs.state==STATEPLAYING)
+    window.requestAnimationFrame(rafcallback);
 }
 
 // New level screen
 function newlevel(level)
 {
+  var hints=[];
+
   if ((level<0) || (level>=levels.length))
     return;
 
@@ -1921,10 +2033,64 @@ function newlevel(level)
   gs.timeline.end().reset();
   gs.timeline=new timelineobj();
 
+  // Clear any messageboxes left on screen
+  gs.msgqueue=[];
+  gs.msgboxtime=0;
+
   gs.level=level;
   gs.state=STATEPLAYING;
   loadlevel(gs.level);
   window.requestAnimationFrame(rafcallback);
+
+  // Add hints depending on level
+  switch (level)
+  {
+    case 0:
+      hints.push("["+TILEJS13K+"]Welcome to JS13K entry\nby picosonic",
+        "["+TILECAT+"]Mochi has been imprisoned",
+        "["+TILESTAR+"]Collect all the stars",
+        "["+TILEFINISH+"]Find the finish\nto advance");
+      break;
+
+    case 1:
+      hints.push("["+TILESPRINGUP+"]Use springs to reach higher");
+      break;
+
+    case 2:
+      hints.push("["+TILEWATER+"]Mochi hates water",
+        "["+TILEHEART+"]Collect hearts to heal");
+      break;
+
+    case 2:
+      hints.push("["+TILESPIKES+"]Careful of the spikes",
+        "["+TILEMAGNET+"]Jump to magnets\nto use ziplines");
+      break;
+
+    case 3:
+      hints.push("["+TILELEVERON+"]Control electricy\nwith levers",
+        "["+TILELEVEROFF+"]Press down on a lever\nto use it");
+      break;
+
+    case 4:
+      hints.push("["+TILESWEEPER+"]Defeat the sweepers\nlure them to hazards");
+      break;
+
+    case 5:
+      hints.push("["+TILEDRONE+"Defeat the drones");
+      break;
+
+    case 6:
+      hints.push("["+TILEKEY+"]Find a key to\nunlock the doors",
+        "["+TILEPADLOCK+"]Press down to unlock\nand enter doors");
+      break;
+
+    default:
+      break;
+  }
+
+  // Queue up all the hints as message boxes one after the other
+  for (var n=0; n<hints.length; n++)
+    showmessagebox(hints[n], 3*TARGETFPS);
 }
 
 function resettointro()
@@ -1953,8 +2119,13 @@ function endgame(percent)
     gs.ctx.clearRect(0, 0, gs.canvas.width, gs.canvas.height);
     setTimeout(resettointro, 300);
   }
+  else
+  {
+    gs.ctx.clearRect(0, 0, gs.canvas.width, gs.canvas.height);
+    write(gs.ctx, 30, 30, "CONGRATULATIONS", 3, {r:255, g:191, b:0});
 
-  // TODO
+    // TODO
+  }
 }
 
 function draweyes()
@@ -2082,6 +2253,7 @@ function init()
     {
       savedata=JSON.parse(savedata);
       gs.score=savedata.score;
+      // TODO ? =savedata.level
       gs.completed=savedata.completed;
     }
   }
