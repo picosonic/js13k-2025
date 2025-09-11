@@ -2046,7 +2046,42 @@ function newlevel(level)
   switch (level)
   {
     case 0:
-      hints.push("["+TILEJS13K+"]WELCOME TO JS13K ENTRY\nBY PICOSONIC");
+      hints.push("["+TILEJS13K+"]Welcome to JS13K entry\nby picosonic",
+        "["+TILECAT+"]Mochi has been imprisoned",
+        "["+TILESTAR+"]Collect all the stars",
+        "["+TILEFINISH+"]Find the finish\nto advance");
+      break;
+
+    case 1:
+      hints.push("["+TILESPRINGUP+"]Use springs to reach higher");
+      break;
+
+    case 2:
+      hints.push("["+TILEWATER+"]Mochi hates water",
+        "["+TILEHEART+"]Collect hearts to heal");
+      break;
+
+    case 2:
+      hints.push("["+TILESPIKES+"]Careful of the spikes",
+        "["+TILEMAGNET+"]Jump to magnets\nto use ziplines");
+      break;
+
+    case 3:
+      hints.push("["+TILELEVERON+"]Control electricy\nwith levers",
+        "["+TILELEVEROFF+"]Press down on a lever\nto use it");
+      break;
+
+    case 4:
+      hints.push("["+TILESWEEPER+"]Defeat the sweepers\nlure them to hazards");
+      break;
+
+    case 5:
+      hints.push("["+TILEDRONE+"Defeat the drones");
+      break;
+
+    case 6:
+      hints.push("["+TILEKEY+"]Find a key to\nunlock the doors",
+        "["+TILEPADLOCK+"]Press down to unlock\nand enter doors");
       break;
 
     default:
