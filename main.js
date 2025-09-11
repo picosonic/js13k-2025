@@ -809,6 +809,7 @@ function offmapcheck()
     gs.pausetimer=0;
     gs.electrotimer=0;
     gs.runtimer=0;
+    gs.htime=0;
 
     if (gs.lives>0)
       gs.lives-=0.5;
