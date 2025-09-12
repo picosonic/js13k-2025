@@ -3,6 +3,7 @@
  <properties>
   <property name="doors" value=""/>
   <property name="title" value="Level Eight"/>
+  <property name="desc" value=""/>
  </properties>
  <tileset firstgid="1" source="tilemap.tsx"/>
  <layer name="tiles" width="10" height="10">

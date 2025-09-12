@@ -1624,6 +1624,7 @@ function updatecharAI()
               case TILEWATER2:
               case TILEWATER3:
               case TILEWATER4:
+              case TILEELECTRIC:
               case TILESPIKES:
                 generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 16, 2, {r:0xff, g:0xff, b:1});
                 generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 8, 2, {r:0x29, g:0xad, b:0xff});
@@ -2057,6 +2058,9 @@ function newlevel(level)
   
     // Write level title
     write(gs.ctx, (XMAX/2)-((Math.floor(levels[gs.level].title.length/2)*FONTWIDTH)*2), 40, levels[gs.level].title, 2, {r:255, g:255, b:255});
+
+    // Write level description
+    write(gs.ctx, (XMAX/2)-((Math.floor(levels[gs.level].desc.length/2)*FONTWIDTH)*2), 80, levels[gs.level].desc, 2, {r:0, g:255, b:0});
   }).add(2*1000, function()
   {
     gs.state=STATEPLAYING;
@@ -2068,9 +2072,9 @@ function newlevel(level)
   switch (level)
   {
     case 0:
-      hints.push("["+TILEJS13K+"]Welcome to JS13K entry\nby picosonic",
-        "["+TILECAT+"]Mochi has been imprisoned",
-        "["+TILESTAR+"]Collect all the stars",
+      hints.push("["+TILEJS13K+"]Welcome to JS XIII K entry\nby picosonic",
+        "["+TILECAT+"]Mochi has been\nimprisoned",
+        "["+TILESTAR+"]Collect all\nthe stars",
         "["+TILEFINISH+"]Find the finish\nto advance");
       break;
 
