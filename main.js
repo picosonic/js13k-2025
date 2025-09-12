@@ -16,8 +16,6 @@ const TILECATWIDTH=20;
 const TILECATHEIGHT=16;
 const TILESCATPERROW=6;
 
-const BGCOLOUR="rgb(82,98,114)";
-
 const STATEINTRO=0;
 const STATEMENU=1;
 const STATEPLAYING=2;
@@ -1845,7 +1843,7 @@ function islevelcompleted()
   //   no stars
   //   no drones
   //   no sweepers
-  //   standing on fimish point
+  //   standing on finish point
 
   return ((countchars([TILESTAR, TILEDRONE, TILEDRONE2, TILESWEEPER, TILESWEEPERFALL])==0) &&
           ((playerlook(gs.x, gs.y+1)-1)==TILEFINISH));
@@ -1909,7 +1907,6 @@ function redraw()
   scrolltoplayer(true);
 
   // Clear the canvas
-  //gs.ctx.fillStyle=BGCOLOUR;
   gs.ctx.fillStyle=gs.nightsky;
   gs.ctx.fillRect(0, 0, gs.canvas.width, gs.canvas.height);
 
@@ -2106,7 +2103,7 @@ function newlevel(level)
       break;
 
     case 7:
-      hints.push("["+TILEKEY+"]Find a key to\nunlock the doors",
+      hints.push("["+TILEKEY+"]Find keys to\nunlock the doors",
         "["+TILEPADLOCK+"]Press down to unlock\nand enter doors");
       break;
 
@@ -2264,7 +2261,7 @@ function init()
   };
 
   // Set up canvas
-  gs.canvas=document.getElementById("canvas");
+  gs.canvas=document.getElementById("c");
   gs.ctx=gs.canvas.getContext("2d");
   gs.ctx.imageSmoothingEnabled=false; // don't blur when scaling
   gs.nightsky=gs.ctx.createLinearGradient(XMAX/2, 0, XMAX/2, YMAX);

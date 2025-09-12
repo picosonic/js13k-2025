@@ -16,7 +16,7 @@ body
   background:#000;
 }
 
-#wrapper
+#w
 {
   position:absolute;
   left:0px;
@@ -26,10 +26,9 @@ body
   overflow:hidden;
 }
 
-canvas
+#c
 {
   position:absolute;
-  
   image-rendering:pixelated;
   image-rendering:crisp-edges;
 }
