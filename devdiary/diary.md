@@ -250,3 +250,7 @@ Made 7 tutorial levels slowly getting harder
 Added level descriptions
 
 Made electricity hurt sweepers
+
+12th September
+--------------
+Added 8th tutorial level introducing doors to the player
