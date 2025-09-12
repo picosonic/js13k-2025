@@ -260,3 +260,5 @@ Squashed level 4 to make more room for other stuff
 Added red and blue NPCs, they walk around, hide when the player comes nearby, inflate up like a pufferfish when hit by a drone
 
 Added 9th "full" level
+
+Gone over by 500 bytes, tweaked all the levels making them smaller and less complex
