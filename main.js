@@ -21,6 +21,7 @@ const STATEMENU=1;
 const STATEPLAYING=2;
 const STATENEWLEVEL=3;
 const STATECOMPLETE=4;
+const STATEFAIL=5;
 
 const KEYNONE=0;
 const KEYLEFT=1;
@@ -1982,6 +1983,20 @@ function rafcallback(timestamp)
 
     redraw();
 
+    // Check for level failed
+    if ((gs.state==STATEPLAYING) && (gs.lives==0))
+    {
+      gs.xoffset=0;
+      gs.yoffset=0;
+
+      gs.state=STATEFAIL;
+
+      // Reduce issues when inputs held
+      clearinputstate();
+
+      gs.timeline.reset().add(10*1000, undefined).addcallback(failgame).begin(0);
+    }
+
     // Check for level completed
     if ((gs.state==STATEPLAYING) && (islevelcompleted()))
     {
@@ -2121,6 +2136,40 @@ function newlevel(level)
 function resettointro()
 {
   gs.timeline.reset().add(10*1000, undefined).addcallback(intro).begin(0);
+}
+
+// Fail game animation
+function failgame(percent)
+{
+  if (gs.state!=STATEFAIL)
+    return;
+
+  // Gamepad support
+  try
+  {
+    if (!!(navigator.getGamepads))
+      gamepadscan();
+  }
+  catch(e){}
+
+  // Check if done or control key/gamepad pressed
+  if ((percent>=98) || (((gs.keystate!=KEYNONE) || (gs.padstate!=KEYNONE)) && (percent>=20)))
+  {
+    gs.state=STATEINTRO;
+    gs.ctx.clearRect(0, 0, gs.canvas.width, gs.canvas.height);
+    setTimeout(resettointro, 300);
+  }
+  else
+  {
+    gs.ctx.clearRect(0, 0, gs.canvas.width, gs.canvas.height);
+
+    write(gs.ctx, 30, 40, "UNLUCKY", 3, {r:255, g:0, b:0});
+    write(gs.ctx, 30, 70, "MOCHI", 3, {r:255, g:0, b:255});
+    write(gs.ctx, 30, 100, "FAILED TO ESCAPE", 3, {r:255, g:255, b:0});
+
+    write(gs.ctx, 30, 150, "SCORE", 2, {r:255, g:255, b:255});
+    drawnumber(100+gs.xoffset, 149+gs.yoffset, gs.score);
+  }
 }
 
 // End game animation
