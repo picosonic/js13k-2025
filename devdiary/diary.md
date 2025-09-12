@@ -254,3 +254,9 @@ Made electricity hurt sweepers
 12th September
 --------------
 Added 8th tutorial level introducing doors to the player
+
+Squashed level 4 to make more room for other stuff
+
+Added red and blue NPCs, they walk around, hide when the player comes nearby, inflate up like a pufferfish when hit by a drone
+
+Added 9th "full" level
