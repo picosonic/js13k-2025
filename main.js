@@ -126,8 +126,6 @@ var gs={
   step:(1/TARGETFPS), // target step time @ 60 fps
   acc:0, // accumulated time since last frame
   lasttime:0, // time of last frame
-  fps:0, // current FPS
-  frametimes:[], // array of frame times
 
   // physics in pixels per frame @ 60fps
   gravity:0.25,
@@ -518,19 +516,6 @@ function loadlevel(level)
           case TILEWATER2:
           case TILEWATER3:
           case TILEWATER4:
-            obj.anim=WATERFLOW; // Slow animation
-            gs.chars.push(obj);
-            break;
-
-          case TILEDRONE:
-          case TILEDRONE2:
-            obj.dx=-1; // Null destination
-            obj.dy=-1;
-            obj.path=[]; // Empty path
-            obj.seenplayer=false;
-            gs.chars.push(obj);
-            break;
-
           case TILERED:
           case TILEREDWALK:
           case TILEREDWALK2:
@@ -542,6 +527,15 @@ function loadlevel(level)
           case TILEBLUESPLAT:
           case TILEBLUEPOP:
             obj.anim=WATERFLOW; // Slow animation
+            gs.chars.push(obj);
+            break;
+
+          case TILEDRONE:
+          case TILEDRONE2:
+            obj.dx=-1; // Null destination
+            obj.dy=-1;
+            obj.path=[]; // Empty path
+            obj.seenplayer=false;
             gs.chars.push(obj);
             break;
 
@@ -1023,38 +1017,33 @@ function collisioncheck()
 // Slow the player using friction
 function standcheck()
 {
+  var pt=false; // start pause timer
+
   // Going left
   if (gs.dir==-1)
   {
     if (gs.hs<0)
-    {
       gs.hs+=gs.friction;
-    }
     else
-    {
-      gs.hs=0;
-      gs.dir=0;
-      gs.pausetimer=CATSAT;
-      gs.speed=WALKSPEED;
-      gs.runtimer=0;
-    }
+      pt=true;
   }
 
   // Going right
   if (gs.dir==1)
   {
     if (gs.hs>0)
-    {
       gs.hs-=gs.friction;
-    }
     else
-    {
-      gs.hs=0;
-      gs.dir=0;
-      gs.pausetimer=CATSAT;
-      gs.speed=WALKSPEED;
-      gs.runtimer=0;
-    }
+      pt=true;
+  }
+
+  if (pt)
+  {
+    gs.hs=0;
+    gs.dir=0;
+    gs.pausetimer=CATSAT;
+    gs.speed=WALKSPEED;
+    gs.runtimer=0;
   }
 }
 
@@ -1063,7 +1052,7 @@ function updateanimation()
 {
   if (gs.anim==0)
   {
-    // Player animation
+    // Player animation when not stationary
     if (gs.dir!=0)
     {
       gs.frameindex++;
@@ -1113,10 +1102,11 @@ function updateanimation()
           gs.chars[id].anim--;
           if (gs.chars[id].anim==0)
           {
-            gs.chars[id].id++;
+            gs.chars[id].id++; // Advance to next water frame
 
             gs.chars[id].anim=WATERFLOW;
 
+            // Reset frame if if overflow
             if (gs.chars[id].id>TILEWATER4)
               gs.chars[id].id=TILEWATER;
           }
@@ -1359,7 +1349,7 @@ function updateplayerchar()
           {
             for (var id2=0; id2<gs.chars.length; id2++)
             {
-              // Remove electro
+              // Remove electro, saving it for later
               if (gs.chars[id2].id==TILEELECTRIC)
               {
                 gs.chars[id2].ttl=Math.floor((gs.chars[id2].y/TILEHEIGHT)*2);
@@ -1382,6 +1372,7 @@ function updateplayerchar()
           {
             if (gs.electricity.length>0)
             {
+              // Restore the saved electricity
               for (var id2=0; id2<gs.electricity.length; id2++)
               {
                 var newelec=JSON.parse(JSON.stringify(gs.electricity[id2]));
@@ -1489,13 +1480,11 @@ function updateplayerchar()
 
             // Electro buzz
             generateparticles(gs.chars[id].x+(TILEWIDTH/2), gs.chars[id].y+(TILEHEIGHT/2), 16, 1, {r:0xff, g:0xff, b:1});
-            generateparticles(gs.x+(TILECATWIDTH/2), gs.y+(TILECATHEIGHT/2), 4, 4, {});
+            generateparticles(gs.x+(TILECATWIDTH/2), gs.y+(TILECATHEIGHT/2), 4, 4, {}); // Random colours
           }
           break;
 
         case TILEHEART:
-          gs.htime=0; // heal
-
           if (gs.lives<MAXLIVES)
             gs.lives+=0.5;
 
@@ -1508,16 +1497,6 @@ function updateplayerchar()
 
         case TILESWEEPER:
         case TILESWEEPERFALL:
-          if (gs.htime==0)
-          {
-              // Lose health (when not already hurt)
-              if (gs.lives>0)
-                gs.lives-=0.5;
-
-            gs.htime=(TARGETFPS*5);
-          }
-          break;
-
         case TILEDRONE:
         case TILEDRONE2:
           if (gs.htime==0)
