@@ -244,3 +244,9 @@ Fixed icon issue on level 6 hint
 Set minimum view time for into/end to 20% of animation - looks like jerky
 
 Fleshed out congrats screen at end of game
+
+Made 7 tutorial levels slowly getting harder
+
+Added level descriptions
+
+Made electricity hurt sweepers
