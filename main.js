@@ -120,6 +120,8 @@ const TILEHEART=132;
 const TILEHALFHEART=133;
 const TILEEMPTYHEART=134;
 
+const SAVEDATA="mochimidnightgame";
+
 // Game state
 var gs={
   // animation frame of reference
@@ -187,7 +189,6 @@ var gs={
   electricity:[], // array of electricity for when it's turned back on
   leverallowed:0, // time to wait until electricity lever is allowed
   score:0, // score for the level
-  completed:[], // set of booleans indicating if each level has been completed
 
   // Input
   keystate:KEYNONE,
@@ -218,7 +219,10 @@ var gs={
   // Messagebox popup
   msgboxtext:"", // text to show in current messagebox
   msgboxtime:0, // timer for showing current messagebox
-  msgqueue:[] // Message box queue
+  msgqueue:[], // Message box queue
+
+  // Savedata
+  savedata:null
 };
 
 // Random number generator
@@ -2060,11 +2064,9 @@ function rafcallback(timestamp)
       gs.xoffset=0;
       gs.yoffset=0;
 
-      gs.completed[gs.level]=true;
-
       try
       {
-        window.localStorage.setItem('mochimidnightescape', JSON.stringify({score:gs.score, level:gs.level, completed:gs.completed}));
+        window.localStorage.setItem(SAVEDATA, JSON.stringify({level:gs.level}));
       }
       catch (e){}
 
@@ -2179,6 +2181,11 @@ function newlevel(level)
         "["+TILEPADLOCK+"]Press down to unlock\nand enter doors");
       break;
 
+    case 8:
+      hints.push("["+TILEJS13K+"]Nearly there");
+      gs.lives=MAXLIVES;
+      break;
+
     default:
       break;
   }
@@ -2212,6 +2219,8 @@ function failgame(percent)
   // Check if done or control key/gamepad pressed
   if ((percent>=98) || (((gs.keystate!=KEYNONE) || (gs.padstate!=KEYNONE)) && (percent>=20)))
   {
+    gs.level=0; // Player failed - back to the start
+
     gs.state=STATEINTRO;
     gs.ctx.clearRect(0, 0, gs.canvas.width, gs.canvas.height);
     setTimeout(resettointro, 300);
@@ -2382,19 +2391,16 @@ function init()
 
   // Init level vars which are stored between plays
   gs.score=0;
-  for (var i=0; i<levels.length; i++)
-    gs.completed[i]=false;
 
   // Restore from localStorage
   try
   {
-    var savedata=window.localStorage.getItem("mochimidnightescape");
+    var savedata=window.localStorage.getItem(SAVEDATA);
     if ((savedata!=undefined) && (savedata!=null))
     {
-      savedata=JSON.parse(savedata);
-      gs.score=savedata.score;
-      // TODO ? =savedata.level
-      gs.completed=savedata.completed;
+      gs.savedata=JSON.parse(savedata);
+
+      gs.level=gs.savedata.level
     }
   }
   catch (e) {}
