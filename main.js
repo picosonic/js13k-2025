@@ -75,16 +75,16 @@ const TILECLOUD=81;
 const TILEELECTRIC=83;
 const TILESTAR=88;
 const TILEMAGNET=89;
-// const TILEr=90;
-// const TILEr_WALK=91;
-// const TILEr_WALK2=92;
-// const TILEr_SPLAT=93;
-// const TILEr_POP=94;
-// const TILEb=95;
-// const TILEb_WALK=96;
-// const TILEb_WALK2=97;
-// const TILEb_SPLAT=98;
-// const TILEb_POP=99;
+const TILERED=90;
+const TILEREDWALK=91;
+const TILEREDWALK2=92;
+const TILEREDSPLAT=93;
+const TILEREDPOP=94;
+const TILEBLUE=95;
+const TILEBLUEWALK=96;
+const TILEBLUEWALK2=97;
+const TILEBLUESPLAT=98;
+const TILEBLUEPOP=99;
 const TILEDOORLOCKTL=101;
 const TILEDOORLOCKTR=102;
 const TILEDOORTL=103;
@@ -528,6 +528,20 @@ function loadlevel(level)
             obj.dy=-1;
             obj.path=[]; // Empty path
             obj.seenplayer=false;
+            gs.chars.push(obj);
+            break;
+
+          case TILERED:
+          case TILEREDWALK:
+          case TILEREDWALK2:
+          case TILEREDSPLAT:
+          case TILEREDPOP:
+          case TILEBLUE:
+          case TILEBLUEWALK:
+          case TILEBLUEWALK2:
+          case TILEBLUESPLAT:
+          case TILEBLUEPOP:
+            obj.anim=WATERFLOW; // Slow animation
             gs.chars.push(obj);
             break;
 
@@ -1076,6 +1090,22 @@ function updateanimation()
           gs.chars[id].id=(gs.chars[id].id==TILEDRONE?TILEDRONE2:TILEDRONE);
           break;
 
+        case TILEREDWALK:
+        case TILEREDWALK2:
+        case TILEBLUEWALK:
+        case TILEBLUEWALK2:
+          gs.chars[id].anim--;
+          if (gs.chars[id].anim==0)
+          {
+            gs.chars[id].anim=WATERFLOW;
+
+            if (gs.chars[id].id<TILEBLUE)
+              gs.chars[id].id=(gs.chars[id].id==TILEREDWALK?TILEREDWALK2:TILEREDWALK);
+            else
+              gs.chars[id].id=(gs.chars[id].id==TILEBLUEWALK?TILEBLUEWALK2:TILEBLUEWALK);
+          }
+          break;
+
         case TILEWATER:
         case TILEWATER2:
         case TILEWATER3:
@@ -1556,18 +1586,62 @@ function updatecharAI()
     ox=gs.chars[id].x;
     oy=gs.chars[id].y;
 
+    // Check if dwelling
+    if (gs.chars[id].dwell>0)
+    {
+      gs.chars[id].dwell--;
+
+      continue;
+    }
+
     switch (gs.chars[id].id)
     {
-      case TILESWEEPER:
-      case TILESWEEPERFALL:
-        // Check if dwelling
-        if (gs.chars[id].dwell>0)
-        {
-          gs.chars[id].dwell--;
+      case TILERED:
+      case TILEBLUE:
+        gs.chars[id].id=gs.chars[id].id<TILEBLUE?TILEREDWALK:TILEBLUEWALK;
+        gs.chars[id].anim=WATERFLOW;
+        gs.chars[id].hs=(rng()<0.5)?0.5:-0.5;
+        gs.chars[id].flip=(gs.chars[id].hs<0);
+        continue;
+        break;
 
+      case TILEREDSPLAT:
+      case TILEREDPOP:
+      case TILEBLUESPLAT:
+      case TILEBLUEPOP:
+        gs.chars[id].id=gs.chars[id].id<TILEBLUE?TILERED:TILEBLUE;
+        gs.chars[id].dwell=Math.floor(TARGETFPS/2);
+        continue;
+        break;
+
+      case TILEREDWALK:
+      case TILEREDWALK2:
+      case TILEBLUEWALK:
+      case TILEBLUEWALK2:
+        if (calcHypotenuse(Math.abs(gs.x-gs.chars[id].x), Math.abs(gs.y-gs.chars[id].y))<(TILEWIDTH*1))
+        {
+          gs.chars[id].id=gs.chars[id].id<TILEBLUE?TILEREDSPLAT:TILEBLUESPLAT;
+          gs.chars[id].dwell=(TARGETFPS*2);
           continue;
         }
 
+        nx=(gs.chars[id].x+=gs.chars[id].hs); // calculate new x position
+        if ((collide(nx, gs.chars[id].y, TILEWIDTH, TILEHEIGHT)) || // blocked by something
+            (
+              (!collide(nx+(gs.chars[id].flip?(TILEWIDTH/2)*-1:(TILEWIDTH)/2), gs.chars[id].y, TILEWIDTH, TILEHEIGHT)) && // not blocked forwards
+              (!collide(nx+(gs.chars[id].flip?(TILEWIDTH/2)*-1:(TILEWIDTH)/2), gs.chars[id].y+(TILEWIDTH/2), TILEWIDTH, TILEHEIGHT)) // not blocked forwards+down (i.e. edge)
+            ))
+        {
+          // Turn around
+          gs.chars[id].hs*=-1;
+          gs.chars[id].flip=!gs.chars[id].flip;
+        }
+        else
+          gs.chars[id].x=nx;
+        break;
+
+      case TILESWEEPER:
+      case TILESWEEPERFALL:
         // Check for solid ground underneath
         if ((!gs.chars[id].fall) && (!collide(gs.chars[id].x, gs.chars[id].y+1, TILEWIDTH, TILEHEIGHT)))
         {
@@ -1645,14 +1719,6 @@ function updatecharAI()
 
       case TILEDRONE:
       case TILEDRONE2:
-        // Check if dwelling
-        if (gs.chars[id].dwell>0)
-        {
-          gs.chars[id].dwell--;
-
-          continue;
-        }
-
         if (calcHypotenuse(Math.abs(gs.x-gs.chars[id].x), Math.abs(gs.y-gs.chars[id].y))<(TILEWIDTH*4))
         {
           if (gs.chars[id].seenplayer==false)
@@ -1747,6 +1813,18 @@ function updatecharAI()
           {
             switch (gs.chars[id2].id)
             {
+              case TILERED:
+              case TILEREDWALK:
+              case TILEREDWALK2:
+              case TILEREDSPLAT:
+              case TILEBLUE:
+              case TILEBLUEWALK:
+              case TILEBLUEWALK2:
+              case TILEBLUESPLAT:
+                gs.chars[id2].id=gs.chars[id2].id<TILEBLUE?TILEREDPOP:TILEBLUEPOP;
+                gs.chars[id2].dwell=(TARGETFPS*3);
+                break;
+
               case TILEELECTRIC:
                 if (gs.chars[id].seenplayer)
                 {
