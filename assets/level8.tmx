@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.2" orientation="orthogonal" renderorder="right-down" width="20" height="16" tilewidth="8" tileheight="8" infinite="0" nextlayerid="3" nextobjectid="1">
+<map version="1.0" tiledversion="1.0.3" orientation="orthogonal" renderorder="right-down" width="20" height="16" tilewidth="8" tileheight="8" nextobjectid="1">
  <properties>
   <property name="desc" value="Door to door"/>
   <property name="doors" value="6x11,13x11|7x11,14,11"/>
   <property name="title" value="Level Eight"/>
  </properties>
  <tileset firstgid="1" source="tilemap.tsx"/>
- <layer id="1" name="tiles" width="20" height="16">
+ <layer name="tiles" width="20" height="16">
   <data encoding="csv">
 4,5,53,52,53,52,53,52,53,52,53,59,60,59,60,59,60,59,12,13,
 19,0,0,0,0,0,0,0,0,64,42,72,0,0,0,0,0,0,0,28,
@@ -26,7 +26,7 @@
 34,35,35,35,35,35,35,35,35,35,40,42,42,42,42,42,42,42,42,43
 </data>
  </layer>
- <layer id="2" name="chars" width="20" height="16">
+ <layer name="chars" width="20" height="16">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,67,0,0,0,0,0,0,0,0,0,0,0,0,

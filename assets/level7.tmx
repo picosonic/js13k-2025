@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.2" orientation="orthogonal" renderorder="right-down" width="16" height="11" tilewidth="8" tileheight="8" infinite="0" nextlayerid="3" nextobjectid="1">
+<map version="1.0" tiledversion="1.0.3" orientation="orthogonal" renderorder="right-down" width="16" height="11" tilewidth="8" tileheight="8" nextobjectid="1">
  <properties>
   <property name="desc" value="Drones in caves"/>
   <property name="title" value="Level Seven"/>
  </properties>
  <tileset firstgid="1" source="tilemap.tsx"/>
- <layer id="1" name="tiles" width="16" height="11">
+ <layer name="tiles" width="16" height="11">
   <data encoding="csv">
 4,5,5,5,5,5,5,6,33,4,5,5,5,5,5,6,
 19,0,0,0,0,0,0,79,5,80,0,0,0,0,0,21,
@@ -20,7 +20,7 @@
 34,35,35,35,35,35,35,36,40,34,35,35,77,77,35,36
 </data>
  </layer>
- <layer id="2" name="chars" width="16" height="11">
+ <layer name="chars" width="16" height="11">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,113,0,0,0,0,0,0,0,0,0,113,0,0,0,

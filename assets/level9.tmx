@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.2" orientation="orthogonal" renderorder="right-down" width="55" height="40" tilewidth="8" tileheight="8" infinite="0" nextlayerid="3" nextobjectid="1">
+<map version="1.0" tiledversion="1.0.3" orientation="orthogonal" renderorder="right-down" width="55" height="40" tilewidth="8" tileheight="8" nextobjectid="1">
  <properties>
   <property name="desc" value="Escaping"/>
   <property name="doors" value="14x4,14x8|15x4,15x8|17x8,31x2|18x8,32x2|43x5,37x15|44x5,38x15|30x15,6x28|31x15,7x28|37x38,27x2|38x38,28x2"/>
   <property name="title" value="Level Nine"/>
  </properties>
  <tileset firstgid="1" source="tilemap.tsx"/>
- <layer id="1" name="tiles" width="55" height="40">
+ <layer name="tiles" width="55" height="40">
   <data encoding="csv">
 4,5,5,5,5,5,5,5,5,5,6,4,5,5,5,5,6,11,12,12,12,12,12,13,11,12,12,12,12,13,11,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,13,
 19,0,0,0,0,0,0,0,0,0,21,19,0,0,0,0,21,26,0,0,0,0,0,28,26,0,0,0,0,28,26,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,28,
@@ -50,7 +50,7 @@
 34,35,35,35,35,35,35,35,35,35,35,35,35,35,35,35,35,35,35,35,35,35,35,35,34,35,35,42,42,41,42,42,42,42,40,42,42,42,42,42,42,42,42,42,42,42,40,42,42,42,42,42,42,42,43
 </data>
  </layer>
- <layer id="2" name="chars" width="55" height="40">
+ <layer name="chars" width="55" height="40">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,67,84,0,0,0,0,0,0,132,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,104,105,0,0,104,105,0,84,90,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,90,0,0,
