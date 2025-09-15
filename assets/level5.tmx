@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.0.3" orientation="orthogonal" renderorder="right-down" width="27" height="18" tilewidth="8" tileheight="8" nextobjectid="1">
+<map version="1.4" tiledversion="1.4.2" orientation="orthogonal" renderorder="right-down" width="27" height="18" tilewidth="8" tileheight="8" infinite="0" nextlayerid="3" nextobjectid="1">
  <properties>
   <property name="desc" value="Electrifying"/>
   <property name="title" value="Level Five"/>
  </properties>
  <tileset firstgid="1" source="tilemap.tsx"/>
- <layer name="tiles" width="27" height="18">
+ <layer id="1" name="tiles" width="27" height="18">
   <data encoding="csv">
 4,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,6,
 19,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,21,
@@ -23,11 +23,11 @@
 19,71,72,0,79,80,0,0,86,87,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,21,
 19,86,87,0,0,0,0,0,0,0,0,0,0,0,0,77,77,77,0,61,61,61,61,61,61,0,21,
 19,0,0,0,0,0,0,0,0,0,0,0,0,0,0,64,35,65,0,0,0,0,0,0,0,0,21,
-19,0,0,0,0,0,0,0,0,0,0,0,0,0,0,21,40,19,0,0,0,0,0,0,0,0,21,
+19,0,0,0,0,0,0,0,0,0,0,0,0,0,0,21,40,19,0,0,0,0,0,0,0,55,21,
 34,35,35,35,35,35,35,35,35,35,35,35,35,35,35,25,18,10,35,35,35,35,35,35,35,35,36
 </data>
  </layer>
- <layer name="chars" width="27" height="18">
+ <layer id="2" name="chars" width="27" height="18">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,90,0,0,84,0,0,0,0,0,0,0,0,0,0,0,0,0,0,84,0,0,90,0,
