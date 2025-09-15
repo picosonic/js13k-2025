@@ -13,7 +13,7 @@ Electricity is not your friend, control it using red levers
 
 Water and sharp spikes are also to be avoided where possible
 
-You only have 9 halves of heart for lives, when these are gone you need to restart the level
+You only have 9 halves of heart for lives, when these are gone you need to restart
 
 Your only defence against guardian drones and sweepers is to lure them to electric fields or water
 
