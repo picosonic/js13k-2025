@@ -92,9 +92,9 @@ class timelineobj
         this.callbacks.forEach((callback) => {
           try
           {
-	    if (this.objs.length>0)
+            if (this.objs.length>0)
               this.objs.forEach((obj) => callback(obj, (delta/this.timeline[0].start)*100));
-	    else
+            else
               callback((delta/this.timeline[0].start)*100);
           }
           catch(e){}
@@ -103,9 +103,9 @@ class timelineobj
         this.callbacks.forEach((callback) => {
           try
           {
-	    if (this.objs.length>0)
+            if (this.objs.length>0)
               this.objs.forEach((obj) => callback(obj));
-	    else
+            else
               callback();
           }
           catch(e){}
