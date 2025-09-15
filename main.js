@@ -2315,7 +2315,7 @@ function intro(percent)
     gs.score=0;
     gs.lives=MAXLIVES;
 
-    newlevel(7);
+    newlevel(0);
   }
   else
   {
