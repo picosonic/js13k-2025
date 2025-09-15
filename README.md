@@ -15,7 +15,7 @@ Water and sharp spikes are also to be avoided where possible
 
 You only have 9 halves of heart for lives, when these are gone you need to restart
 
-Your only defence against guardian drones and sweepers is to lure them to electric fields or water
+Your only defence against guardian drones is to lure them to electric fields, and for the sweepers they are also damaged by spikes and water
 
 Springs can help you access hard-to-reach places
 
