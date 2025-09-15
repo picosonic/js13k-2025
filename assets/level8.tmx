@@ -2,7 +2,7 @@
 <map version="1.0" tiledversion="1.0.3" orientation="orthogonal" renderorder="right-down" width="20" height="16" tilewidth="8" tileheight="8" nextobjectid="1">
  <properties>
   <property name="desc" value="Door to door"/>
-  <property name="doors" value="6x11,13x11|7x11,14,11"/>
+  <property name="doors" value="6x11,13x11"/>
   <property name="title" value="Level Eight"/>
  </properties>
  <tileset firstgid="1" source="tilemap.tsx"/>

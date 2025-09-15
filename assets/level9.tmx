@@ -2,7 +2,7 @@
 <map version="1.0" tiledversion="1.0.3" orientation="orthogonal" renderorder="right-down" width="55" height="40" tilewidth="8" tileheight="8" nextobjectid="1">
  <properties>
   <property name="desc" value="Escaping"/>
-  <property name="doors" value="14x4,14x8|15x4,15x8|17x8,31x2|18x8,32x2|43x5,37x15|44x5,38x15|30x15,6x28|31x15,7x28|37x38,27x2|38x38,28x2"/>
+  <property name="doors" value="14x4,14x8|17x8,31x2|43x5,37x15|30x15,6x28|37x38,27x2"/>
   <property name="title" value="Level Nine"/>
  </properties>
  <tileset firstgid="1" source="tilemap.tsx"/>

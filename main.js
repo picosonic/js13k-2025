@@ -390,7 +390,10 @@ function loaddoors(doortext)
 
       // If we have all the data, then add door pair
       if ((coordsa.length==2) && (coordsb.length==2))
-        gs.doors.push({ax:coordsa[0], ay:coordsa[1], bx:coordsb[0], by:coordsb[1]});
+      {
+        gs.doors.push({ax:Number(coordsa[0]), ay:Number(coordsa[1]), bx:Number(coordsb[0]), by:Number(coordsb[1])});
+        gs.doors.push({ax:Number(coordsa[0])+1, ay:Number(coordsa[1]), bx:Number(coordsb[0])+1, by:Number(coordsb[1])});
+      }
     }
   });
 }
@@ -2312,7 +2315,7 @@ function intro(percent)
     gs.score=0;
     gs.lives=MAXLIVES;
 
-    newlevel(0);
+    newlevel(7);
   }
   else
   {
