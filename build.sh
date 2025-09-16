@@ -59,9 +59,13 @@ then
 
     for property in "title" "doors" "desc"
     do
-      echo -n "${property}:\"" >> "${leveljs}"
-      cat "${file}" | grep "<property " | grep 'name=\"'${property}'\"' | awk -F'"' '{ print $4 }' | tr -d '\n' >> "${leveljs}"
-      echo -n '",' >> "${leveljs}"
+      grep -q "${property}" "${file}"
+      if [ $? -eq 0 ]
+      then
+        echo -n "${property}:\"" >> "${leveljs}"
+        cat "${file}" | grep "<property " | grep 'name=\"'${property}'\"' | awk -F'"' '{ print $4 }' | tr -d '\n' >> "${leveljs}"
+        echo -n '",' >> "${leveljs}"
+      fi
     done
 
     for assettype in "tiles" "chars"
