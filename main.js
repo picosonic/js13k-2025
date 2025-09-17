@@ -1242,7 +1242,7 @@ function updatemovements()
     gs.doortimer--;
 
     // Skip timer if no input detected
-    if ((gs.doortimer<(TARGETFPS/2)) && (gs.keystate==KEYNONE) && (gs.padstate==KEYNONE))
+    if ((gs.keystate==KEYNONE) && (gs.padstate==KEYNONE))
       gs.doortimer=0;
   }
 
