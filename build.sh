@@ -102,15 +102,15 @@ then
   echo -n "" > "${assetjs}"
 
   # Convert from src to dest
-  echo -n 'const tilemapcat="data:image/png;base64,' > "${assetjs}"
+  echo -n 'const tilemapcat="' > "${assetjs}"
   base64 -w 0 "${assetcatsrc}" >> "${assetjs}"
   echo '";' >> "${assetjs}"
 
-  echo -n 'const tilemap="data:image/png;base64,' >> "${assetjs}"
+  echo -n 'const tilemap="' >> "${assetjs}"
   base64 -w 0 "${assetsrc}" >> "${assetjs}"
   echo '";' >> "${assetjs}"
 
-  echo -n 'const tilemapfont="data:image/png;base64,' >> "${assetjs}"
+  echo -n 'const tilemapfont="' >> "${assetjs}"
   base64 -w 0 "${assetfontsrc}" >> "${assetjs}"
   echo '";' >> "${assetjs}"
 

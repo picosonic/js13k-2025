@@ -2349,6 +2349,11 @@ function intro(percent)
   }
 }
 
+function pngprefix(pngsrc)
+{
+  return "data:image/png;base64,"+pngsrc;
+}
+
 // Entry point
 function init()
 {
@@ -2433,7 +2438,7 @@ function init()
     };
     gs.tilemapflip.src=c.toDataURL();
   };
-  gs.tilemap.src=tilemap;
+  gs.tilemap.src=pngprefix(tilemap);
 
   // Load cat tiles, and create a flipped version
   gs.tilemapcat=new Image;
@@ -2457,7 +2462,7 @@ function init()
     };
     gs.tilemapcatflip.src=c.toDataURL();
   };
-  gs.tilemapcat.src=tilemapcat;
+  gs.tilemapcat.src=pngprefix(tilemapcat);
 
   // Load font tiles
   gs.font=new Image;
@@ -2467,7 +2472,7 @@ function init()
     if ((gs.tilesloaded) && (gs.catloaded))
       gs.timeline.begin(0);
   };
-  gs.font.src=tilemapfont;
+  gs.font.src=pngprefix(tilemapfont);
 }
 
 // Run the init() once page has loaded
