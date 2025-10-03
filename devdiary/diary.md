@@ -290,3 +290,45 @@ Added red and blue NPCs, they walk around, hide when the player comes nearby, in
 Added 9th "full" level
 
 Gone over by 500 bytes, tweaked all the levels making them smaller and less complex
+
+15th September
+--------------
+Added the AI-generated assets used to make the thumbnails for the competition submission
+
+I saw a video of somebody playing the game and they appeared to get stuck on a piece of foliage like it was solid, so I've fixed that, luckily it didn't affect gameplay
+
+Simplified how doors are defined to only store lower left of door pair, and not both sides. When the doors are processed upon level loading, the right part of the door is inferred
+
+Noticed that the gamepad code was adding a lot of entropy (enemy of compression) by the use of full device id strings, so I've changed them all to be VID and PID only which saves a ton of space
+
+Added a missing tile at the bottom right of level 5, so that the row of spikes is complete and you can't just drop straight down off the ledge
+
+16th September
+--------------
+Allow level properties to be optional, so that an empty doors entry is not created when not required
+
+Having made a lot of space saving improvements, there is now enough space to reinstate most of the levels (except level 7) back to their original pre-squeezed state
+
+17th September
+--------------
+Remove door skip timeout when no keys are pressed to make door use much quicker
+
+Made keyboard and gamepad code more concise to save some more bytes
+
+1st October
+-----------
+Remove duplicate data url definiion for png tilemaps so that more space is saved
+
+I've had an idea to merge the tiles and chars layers in the Tiled maps to try halving their space requirements with a view to big gains in byte usage, to this end I've discovered that level 9 has some sprites in the same position on both the tiles and chars layers, so I've fixed that
+
+2nd October
+-----------
+To be able to produce a link to the game on github pages for a "directors cut" link, I need to add the generated tilemaps and levels to the repo and remove those files from the gitignore file
+
+3rd October
+-----------
+Further reduction using const for png data urls to save having a function
+
+Consolidated duplicate CSS properties for overflow
+
+Added PHP script to parse Tiled tmx levels and output a more concise level with merged tile layers
