@@ -122,6 +122,7 @@ const TILEEMPTYHEART=134;
 
 const SAVEDATA="mochimidnightgame";
 const PNGPREFIX="data:image/png;base64,";
+const CHAROFFS=256;
 
 // Game state
 var gs={
@@ -448,8 +449,13 @@ function loadlevel(level)
   // Set current level to new one
   gs.level=level;
 
-  // Deep copy tiles list to allow changes
-  gs.tiles=JSON.parse(JSON.stringify(levels[gs.level].tiles));
+  // Deep copy level tiles list to allow changes
+  gs.tiles=JSON.parse(JSON.stringify(levels[gs.level].level));
+
+  // Remove anything over threshold
+  gs.tiles.forEach((tileid, index) => {
+    if (parseInt(tileid||0, 10)>CHAROFFS) gs.tiles[index]=0;
+  });
 
   // Get width/height of new level
   gs.width=parseInt(levels[gs.level].width, 10);
@@ -470,7 +476,10 @@ function loadlevel(level)
   {
     for (var x=0; x<gs.width; x++)
     {
-      var tile=parseInt(levels[gs.level].chars[(y*gs.width)+x]||0, 10);
+      var tile=parseInt(levels[gs.level].level[(y*gs.width)+x]||0, 10);
+
+      if (tile<CHAROFFS) continue;
+      tile-=CHAROFFS;
 
       if (tile!=0)
       {
@@ -507,7 +516,10 @@ function loadlevel(level)
             // Look for other magnet at same height
             for (var zx=0; zx<gs.width; zx++)
             {
-              var ztile=parseInt(levels[gs.level].chars[(y*gs.width)+zx]||0, 10);
+              var ztile=parseInt(levels[gs.level].level[(y*gs.width)+zx]||0, 10);
+
+              if (ztile<CHAROFFS) continue;
+              ztile-=CHAROFFS;
 
               if (((ztile-1)==TILEMAGNET) && (zx!=x))
                 obj.zx=(zx*TILEWIDTH); // Found other magnet
