@@ -121,6 +121,7 @@ const TILEHALFHEART=133;
 const TILEEMPTYHEART=134;
 
 const SAVEDATA="mochimidnightgame";
+const PNGPREFIX="data:image/png;base64,";
 
 // Game state
 var gs={
@@ -2349,11 +2350,6 @@ function intro(percent)
   }
 }
 
-function pngprefix(pngsrc)
-{
-  return "data:image/png;base64,"+pngsrc;
-}
-
 // Entry point
 function init()
 {
@@ -2438,7 +2434,7 @@ function init()
     };
     gs.tilemapflip.src=c.toDataURL();
   };
-  gs.tilemap.src=pngprefix(tilemap);
+  gs.tilemap.src=PNGPREFIX+tilemap;
 
   // Load cat tiles, and create a flipped version
   gs.tilemapcat=new Image;
@@ -2462,7 +2458,7 @@ function init()
     };
     gs.tilemapcatflip.src=c.toDataURL();
   };
-  gs.tilemapcat.src=pngprefix(tilemapcat);
+  gs.tilemapcat.src=PNGPREFIX+tilemapcat;
 
   // Load font tiles
   gs.font=new Image;
@@ -2472,7 +2468,7 @@ function init()
     if ((gs.tilesloaded) && (gs.catloaded))
       gs.timeline.begin(0);
   };
-  gs.font.src=pngprefix(tilemapfont);
+  gs.font.src=PNGPREFIX+tilemapfont;
 }
 
 // Run the init() once page has loaded
