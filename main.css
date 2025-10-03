@@ -8,11 +8,12 @@
   -moz-user-select:none; /* Firefox */
 
   touch-action:none; /* disable panning/zooming gestures */
+
+  overflow:hidden;
 }
 
 body
 {
-  overflow:hidden;
   background:#000;
 }
 
@@ -23,7 +24,6 @@ body
   top:0px;
   width:100%;
   height:100%;
-  overflow:hidden;
 }
 
 #c
