@@ -2077,6 +2077,10 @@ function rafcallback(timestamp)
     // Check for level completed
     if ((gs.state==STATEPLAYING) && (islevelcompleted()))
     {
+      // Add to score based on how much health is left
+      gs.score+=(10*gs.lives);
+
+      // Reset scroll offsets
       gs.xoffset=0;
       gs.yoffset=0;
 
