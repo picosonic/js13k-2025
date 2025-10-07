@@ -332,3 +332,7 @@ Further reduction using const for png data urls to save having a function
 Consolidated duplicate CSS properties for overflow
 
 Added PHP script to parse Tiled tmx levels and output a more concise level with merged tile layers
+
+7th October
+-----------
+Realising that each playthrough to the end woul have the score, I've rewarded those who get hurt the least by adding a multiple of the remaining health to the score when each level is completed
