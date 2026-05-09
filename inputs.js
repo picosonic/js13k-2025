@@ -170,7 +170,8 @@ function gamepadscan()
           gs.gamepadaxes=axes_0134;
         }
         else
-        if (gamepads[padid].id.match("/^045e-028e-/i")) // "045e-028e-Microsoft X-Box 360 pad"
+        if ((gamepads[padid].id.match("/^045e-028e-/i")) || // "045e-028e-Microsoft X-Box 360 pad"
+            (gamepads[padid].id.match("/^2022-3002-/i"))) // "2022-3002-Xbox Wireless Controller"
         {
           // XBOX 360
           // 8Bitdo GBros. Adapter (XInput mode)
