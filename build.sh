@@ -46,36 +46,19 @@ then
 
   # Start new file
   echo -n "var levels=[" > "${leveljs}"
+  first="true"
   for file in `ls assets/level*.tmx | sort -V`
   do
-    echo -n "{" >> "${leveljs}"
+    if [ "$first" = "false" ]
+    then
+      echo -n "," >> "${leveljs}"
+    fi
 
-    for attrib in "width" "height"
-    do
-      echo -n "${attrib}:" >> "${leveljs}"
-      cat "${file}" | grep "<map " | tr ' ' '\n' | grep '^'${attrib}'=' | awk -F'"' '{ print $2 }' | tr -d '\n' >> "${leveljs}"
-      echo -n ',' >> "${leveljs}"
-    done
+    php compactlevel.php "${file}" | sed 's/,0,/,,/g' | sed 's/,0,/,,/g' | sed 's/\[0,/,/g' | sed 's/,0\]/,/g' | sed 's/"width"/width/g' | sed 's/"height"/height/g' | sed 's/"title"/title/g' | sed 's/"desc"/desc/g' | sed 's/"doors"/doors/g' >> "${leveljs}"
 
-    for property in "title" "doors" "desc"
-    do
-      grep -q "${property}" "${file}"
-      if [ $? -eq 0 ]
-      then
-        echo -n "${property}:\"" >> "${leveljs}"
-        cat "${file}" | grep "<property " | grep 'name=\"'${property}'\"' | awk -F'"' '{ print $4 }' | tr -d '\n' >> "${leveljs}"
-        echo -n '",' >> "${leveljs}"
-      fi
-    done
-
-    for assettype in "tiles" "chars"
-    do
-      echo -n "${assettype}:[" >> "${leveljs}"
-      cat "${file}" | tr -d '\n' | sed 's/<layer /\n<layer /g' | grep "${assettype}" | sed 's/</\n</g' | grep "<data " | awk -F'>' '{ print $2 }' | sed 's/,0,/,,/g' | sed 's/,0,/,,/g' | sed 's/^0,/,/g' | sed 's/,0$/,/g' | tr -d '\n' >> "${leveljs}"
-      echo -n "]," >> "${leveljs}"
-    done
-    echo -n "}," >> "${leveljs}"
+    first="false"
   done
+
   echo -n "];" >> "${leveljs}"
 
   echo "done"

@@ -121,6 +121,8 @@ const TILEHALFHEART=133;
 const TILEEMPTYHEART=134;
 
 const SAVEDATA="mochimidnightgame";
+const PNGPREFIX="data:image/png;base64,";
+const CHAROFFS=256;
 
 // Game state
 var gs={
@@ -447,8 +449,13 @@ function loadlevel(level)
   // Set current level to new one
   gs.level=level;
 
-  // Deep copy tiles list to allow changes
-  gs.tiles=JSON.parse(JSON.stringify(levels[gs.level].tiles));
+  // Deep copy level tiles list to allow changes
+  gs.tiles=JSON.parse(JSON.stringify(levels[gs.level].level));
+
+  // Remove anything over threshold
+  gs.tiles.forEach((tileid, index) => {
+    if (parseInt(tileid||0, 10)>CHAROFFS) gs.tiles[index]=0;
+  });
 
   // Get width/height of new level
   gs.width=parseInt(levels[gs.level].width, 10);
@@ -469,7 +476,10 @@ function loadlevel(level)
   {
     for (var x=0; x<gs.width; x++)
     {
-      var tile=parseInt(levels[gs.level].chars[(y*gs.width)+x]||0, 10);
+      var tile=parseInt(levels[gs.level].level[(y*gs.width)+x]||0, 10);
+
+      if (tile<CHAROFFS) continue;
+      tile-=CHAROFFS;
 
       if (tile!=0)
       {
@@ -506,7 +516,10 @@ function loadlevel(level)
             // Look for other magnet at same height
             for (var zx=0; zx<gs.width; zx++)
             {
-              var ztile=parseInt(levels[gs.level].chars[(y*gs.width)+zx]||0, 10);
+              var ztile=parseInt(levels[gs.level].level[(y*gs.width)+zx]||0, 10);
+
+              if (ztile<CHAROFFS) continue;
+              ztile-=CHAROFFS;
 
               if (((ztile-1)==TILEMAGNET) && (zx!=x))
                 obj.zx=(zx*TILEWIDTH); // Found other magnet
@@ -2064,6 +2077,10 @@ function rafcallback(timestamp)
     // Check for level completed
     if ((gs.state==STATEPLAYING) && (islevelcompleted()))
     {
+      // Add to score based on how much health is left
+      gs.score+=(10*gs.lives);
+
+      // Reset scroll offsets
       gs.xoffset=0;
       gs.yoffset=0;
 
@@ -2349,11 +2366,6 @@ function intro(percent)
   }
 }
 
-function pngprefix(pngsrc)
-{
-  return "data:image/png;base64,"+pngsrc;
-}
-
 // Entry point
 function init()
 {
@@ -2438,7 +2450,7 @@ function init()
     };
     gs.tilemapflip.src=c.toDataURL();
   };
-  gs.tilemap.src=pngprefix(tilemap);
+  gs.tilemap.src=PNGPREFIX+tilemap;
 
   // Load cat tiles, and create a flipped version
   gs.tilemapcat=new Image;
@@ -2462,7 +2474,7 @@ function init()
     };
     gs.tilemapcatflip.src=c.toDataURL();
   };
-  gs.tilemapcat.src=pngprefix(tilemapcat);
+  gs.tilemapcat.src=PNGPREFIX+tilemapcat;
 
   // Load font tiles
   gs.font=new Image;
@@ -2472,7 +2484,7 @@ function init()
     if ((gs.tilesloaded) && (gs.catloaded))
       gs.timeline.begin(0);
   };
-  gs.font.src=pngprefix(tilemapfont);
+  gs.font.src=PNGPREFIX+tilemapfont;
 }
 
 // Run the init() once page has loaded
