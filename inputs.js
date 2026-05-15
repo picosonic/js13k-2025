@@ -126,7 +126,6 @@ function gamepadscan()
       // If we don't already have this one, add mapping for it
       if (gs.gamepad!=padid)
       {
-        alert("Found new gamepad "+padid+" '"+gamepads[padid].id+"'");
         //console.log("Found new gamepad "+padid+" '"+gamepads[padid].id+"'");
 
         // Cache gamepad id
@@ -172,7 +171,7 @@ function gamepadscan()
         }
         else
         if ((gamepads[padid].id.match("/^045e-028e-/i")) || // "045e-028e-Microsoft X-Box 360 pad"
-            (gamepads[padid].id.match("/^2022-3002-/i"))) // "2022-3002-Xbox Wireless Controller"
+            (gamepads[padid].id.match("/^Xbox Wireless Controller/i")))
         {
           // XBOX 360
           // XBOX Series S/X Wireless Controller
