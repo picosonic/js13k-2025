@@ -126,6 +126,7 @@ function gamepadscan()
       // If we don't already have this one, add mapping for it
       if (gs.gamepad!=padid)
       {
+        alert("Found new gamepad "+padid+" '"+gamepads[padid].id+"'");
         //console.log("Found new gamepad "+padid+" '"+gamepads[padid].id+"'");
 
         // Cache gamepad id
@@ -174,6 +175,7 @@ function gamepadscan()
             (gamepads[padid].id.match("/^2022-3002-/i"))) // "2022-3002-Xbox Wireless Controller"
         {
           // XBOX 360
+          // XBOX Series S/X Wireless Controller
           // 8Bitdo GBros. Adapter (XInput mode)
           gs.gamepadbuttons[4]=0;  // bottom button (right) x
 
