@@ -1,5 +1,25 @@
 // Input processing
 
+// Get URL parameters
+function _gup(name)
+{
+  try
+  {
+    name=name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+    var regexS="[\\?&]"+name+"=([^&#]*)";
+    var regex=new RegExp(regexS);
+    var results=regex.exec(window.location.href);
+    if(results==null)
+      return "";
+    else
+      return results[1];
+  }
+
+  catch (e) { return ""; }
+
+  return "";
+}
+
 // Clear input state
 function clearinputstate()
 {
@@ -115,6 +135,8 @@ function gamepadscan()
   var gdown=false;
   var gjump=false;
 
+  gs.debug=(_gup("debug")==1);
+
   // Find active pads
   for (var padid=0; padid<gamepads.length; padid++)
   {
@@ -126,6 +148,9 @@ function gamepadscan()
       // If we don't already have this one, add mapping for it
       if (gs.gamepad!=padid)
       {
+        if (gs.debug)
+          alert("Found new gamepad "+padid+" '"+gamepads[padid].id+"'");
+
         //console.log("Found new gamepad "+padid+" '"+gamepads[padid].id+"'");
 
         // Cache gamepad id
@@ -286,9 +311,11 @@ function gamepadscan()
 
         if (pressed)
         {
+          if (gs.debug)
+            alert("pad "+padid+" button "+i);
+
           switch (i)
           {
-alert("pad "+padid+" button "+i);
             case gs.gamepadbuttons[0]: gleft=true; break;
             case gs.gamepadbuttons[1]: gright=true; break;
             case gs.gamepadbuttons[2]: gup=true; break;
@@ -315,6 +342,9 @@ alert("pad "+padid+" button "+i);
   // Detect disconnect
   if ((found==0) && (gs.gamepad!=-1))
   {
+    if (gs.debug)
+      alert("Disconnected gamepad "+padid);
+
     //console.log("Disconnected gamepad "+padid);
     
     gs.gamepad=-1;
