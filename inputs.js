@@ -288,6 +288,7 @@ function gamepadscan()
         {
           switch (i)
           {
+alert("pad "+padid+" button "+i);
             case gs.gamepadbuttons[0]: gleft=true; break;
             case gs.gamepadbuttons[1]: gright=true; break;
             case gs.gamepadbuttons[2]: gup=true; break;
