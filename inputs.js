@@ -272,11 +272,9 @@ function addGamepad(gamepad)
       gs.gamepadaxes=axes_0134;
     }
     else
-    if ((gamepad.id.match(/^045e-028e-/i)) || // "045e-028e-Microsoft X-Box 360 pad"
-        (gamepad.id.match(/^Xbox Wireless Controller/i)))
+    if (gamepad.id.match(/^045e-028e-/i)) // "045e-028e-Microsoft X-Box 360 pad"
     {
       // XBOX 360
-      // XBOX Series S/X Wireless Controller
       // 8Bitdo GBros. Adapter (XInput mode)
       gs.gamepadbuttons[4]=0;  // bottom button (right) x
 
@@ -331,8 +329,7 @@ function addGamepad(gamepad)
       gs.gamepadaxes=axes_0123;
     }
     else
-    if ((gamepad.id.match(/^2dc8-6100-/i)) || // "2dc8-6100-8Bitdo SF30 Pro"
-        (gamepad.id.match(/^Retroid Pocket Controller/i)))
+    if (gamepad.id.match(/^2dc8-6100-/i)) // "2dc8-6100-8Bitdo SF30 Pro"
     {
       // 8Bitdo SF30 Pro GamePad (DInput mode)
       gs.gamepadbuttons[4]=1;  // bottom button (right) x
@@ -343,6 +340,13 @@ function addGamepad(gamepad)
     {
       if (gs.debug)
         alert("Unknown gamepad mapping");
+
+      gs.gamepadbuttons[0]=14; // left (left) d-left
+      gs.gamepadbuttons[1]=15; // right (left) d-right
+      gs.gamepadbuttons[2]=12; // top (left) d-up
+      gs.gamepadbuttons[3]=13; // bottom (left) d-down
+
+      gs.gamepadbuttons[4]=0;  // bottom button (right) x
     }
   }
 }
