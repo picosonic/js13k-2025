@@ -254,7 +254,7 @@ function addGamepad(gamepad)
       gs.gamepadaxes=axes_0123;
     }
     else
-    if (gamepad.id.match("/^054c-0268-/i")) // "054c-0268-Sony PLAYSTATION(R)3 Controller"
+    if (gamepad.id.match(/^054c-0268-/i)) // "054c-0268-Sony PLAYSTATION(R)3 Controller"
     {
       // PS3 DualShock 3
       gs.gamepadbuttons[0]=15; // left (left) d-left
@@ -266,8 +266,8 @@ function addGamepad(gamepad)
       gs.gamepadaxes=axes_0134;
     }
     else
-    if ((gamepad.id.match("/^045e-028e-/i")) || // "045e-028e-Microsoft X-Box 360 pad"
-        (gamepad.id.match("/^Xbox Wireless Controller/i")))
+    if ((gamepad.id.match(/^045e-028e-/i)) || // "045e-028e-Microsoft X-Box 360 pad"
+        (gamepad.id.match(/^Xbox Wireless Controller/i)))
     {
       // XBOX 360
       // XBOX Series S/X Wireless Controller
@@ -280,7 +280,7 @@ function addGamepad(gamepad)
       gs.gamepadaxes[3]=4; // cam up/down axis
     }
     else
-    if (gamepad.id.match("/^0f0d-00c1-/i")) // "0f0d-00c1-  Switch Controller"
+    if (gamepad.id.match(/^0f0d-00c1-/i)) // "0f0d-00c1-  Switch Controller"
     {
       // Nintendo Switch
       gs.gamepadbuttons[4]=1;  // bottom button (right) x
@@ -291,8 +291,8 @@ function addGamepad(gamepad)
       gs.gamepadaxes[3]=3; // cam up/down axis
     }
     else
-    if ((gamepad.id.match("/^054c-05c4-/i")) ||  // "054c-05c4-Sony Computer Entertainment Wireless Controller"
-        (gamepad.id.match("/^045e-02e0-/i"))) // "045e-02e0-8Bitdo SF30 Pro" or "045e-02e0-8BitDo GBros Adapter"
+    if ((gamepad.id.match(/^054c-05c4-/i)) ||  // "054c-05c4-Sony Computer Entertainment Wireless Controller"
+        (gamepad.id.match(/^045e-02e0-/i))) // "045e-02e0-8Bitdo SF30 Pro" or "045e-02e0-8BitDo GBros Adapter"
     {
       // PS4 DualShock 4
       // 8Bitdo SF30 Pro GamePad (XInput mode)
@@ -302,7 +302,7 @@ function addGamepad(gamepad)
       gs.gamepadaxes=axes_0134;
     }
     else
-    if (gamepad.id.match("/^054c-05c4-/i")) // "054c-0ce6-Sony Interactive Entertainment Wireless Controller" or "054c-0ce6-Wireless Controller"
+    if (gamepad.id.match(/^054c-05c4-/i)) // "054c-0ce6-Sony Interactive Entertainment Wireless Controller" or "054c-0ce6-Wireless Controller"
     {
       // PS5 DualSense
       gs.gamepadbuttons[4]=1;  // bottom button (right) x
@@ -313,8 +313,8 @@ function addGamepad(gamepad)
       gs.gamepadaxes[3]=5; // cam up/down axis
     }
     else
-    if ((gamepad.id.match("/^057e-2009-/i")) || // "057e-2009-Pro Controller"
-        (gamepad.id.match("/^18d1-9400-/i"))) // "18d1-9400-Google Inc. Stadia Controller" or "18d1-9400-Google LLC Stadia Controller rev. A" or "^18d1-9400-Stadia"
+    if ((gamepad.id.match(/^057e-2009-/i)) || // "057e-2009-Pro Controller"
+        (gamepad.id.match(/^18d1-9400-/i))) // "18d1-9400-Google Inc. Stadia Controller" or "18d1-9400-Google LLC Stadia Controller rev. A" or "^18d1-9400-Stadia"
     {
       // Nintendo Switch Pro Controller
       // 8Bitdo SF30 Pro GamePad (Switch mode)
@@ -325,8 +325,8 @@ function addGamepad(gamepad)
       gs.gamepadaxes=axes_0123;
     }
     else
-    if ((gamepad.id.match("/^2dc8-6100-/i")) || // "2dc8-6100-8Bitdo SF30 Pro"
-        (gamepad.id.match("/^Retroid Pocket Controller/i")))
+    if ((gamepad.id.match(/^2dc8-6100-/i)) || // "2dc8-6100-8Bitdo SF30 Pro"
+        (gamepad.id.match(/^Retroid Pocket Controller/i)))
     {
       // 8Bitdo SF30 Pro GamePad (DInput mode)
       gs.gamepadbuttons[4]=1;  // bottom button (right) x
