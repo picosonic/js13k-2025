@@ -126,147 +126,24 @@ const axes_0134=[0, 1, 3, 4];
 // Scan for any connected gamepads
 function gamepadscan()
 {
-  var gamepads=navigator.getGamepads();
-  var found=0;
-
   var gleft=false;
   var gright=false;
   var gup=false;
   var gdown=false;
   var gjump=false;
 
-  gs.debug=(_gup("debug")==1);
-
   // Find active pads
-  for (var padid=0; padid<gamepads.length; padid++)
+  for (const gamepad of navigator.getGamepads())
   {
+    if (!gamepad) continue;
+
     // Only support first found gamepad
-    if ((found==0) && (gamepads[padid] && gamepads[padid].connected))
+    if ((gs.gamepad==gamepad.index) && (gamepad.connected))
     {
-      found++;
-
-      // If we don't already have this one, add mapping for it
-      if (gs.gamepad!=padid)
-      {
-        if (gs.debug)
-          alert("Found new gamepad "+padid+" '"+gamepads[padid].id+"'");
-
-        //console.log("Found new gamepad "+padid+" '"+gamepads[padid].id+"'");
-
-        // Cache gamepad id
-        gs.gamepad=padid;
-
-        // Reset button mappings
-        gs.gamepadbuttons.forEach((mapping) => {mapping=-1;});
-        // [0] left (left) d-left
-        // [1] right (left) d-right
-        // [2] top (left) d-up
-        // [3] bottom (left) d-down
-        // [4] bottom button (right) x
-
-        // Reset axes mappings
-        gs.gamepadaxes.forEach((mapping) => {mapping=-1;});
-        // [0] left/right axis
-        // [1] up/down axis
-        // [2] cam left/right axis
-        // [3] cam up/down axis
-
-        if (gamepads[padid].mapping==="standard")
-        {
-          // Browser supported "standard" gamepad
-          gs.gamepadbuttons[0]=14; // left (left) d-left
-          gs.gamepadbuttons[1]=15; // right (left) d-right
-          gs.gamepadbuttons[2]=12; // top (left) d-up
-          gs.gamepadbuttons[3]=13; // bottom (left) d-down
-          gs.gamepadbuttons[4]=0;  // bottom button (right) x
-
-          gs.gamepadaxes=axes_0123;
-        }
-        else
-        if (gamepads[padid].id.match("/^054c-0268-/i")) // "054c-0268-Sony PLAYSTATION(R)3 Controller"
-        {
-          // PS3 DualShock 3
-          gs.gamepadbuttons[0]=15; // left (left) d-left
-          gs.gamepadbuttons[1]=16; // right (left) d-right
-          gs.gamepadbuttons[2]=13; // top (left) d-up
-          gs.gamepadbuttons[3]=14; // bottom (left) d-down
-          gs.gamepadbuttons[4]=0;  // bottom button (right) x
-
-          gs.gamepadaxes=axes_0134;
-        }
-        else
-        if ((gamepads[padid].id.match("/^045e-028e-/i")) || // "045e-028e-Microsoft X-Box 360 pad"
-            (gamepads[padid].id.match("/^Xbox Wireless Controller/i")))
-        {
-          // XBOX 360
-          // XBOX Series S/X Wireless Controller
-          // 8Bitdo GBros. Adapter (XInput mode)
-          gs.gamepadbuttons[4]=0;  // bottom button (right) x
-
-          gs.gamepadaxes[0]=6; // left/right axis
-          gs.gamepadaxes[1]=7; // up/down axis
-          gs.gamepadaxes[2]=3; // cam left/right axis
-          gs.gamepadaxes[3]=4; // cam up/down axis
-        }
-        else
-        if (gamepads[padid].id.match("/^0f0d-00c1-/i")) // "0f0d-00c1-  Switch Controller"
-        {
-          // Nintendo Switch
-          gs.gamepadbuttons[4]=1;  // bottom button (right) x
-
-          gs.gamepadaxes[0]=4; // left/right axis
-          gs.gamepadaxes[1]=5; // up/down axis
-          gs.gamepadaxes[2]=2; // cam left/right axis
-          gs.gamepadaxes[3]=3; // cam up/down axis
-        }
-        else
-        if ((gamepads[padid].id.match("/^054c-05c4-/i")) ||  // "054c-05c4-Sony Computer Entertainment Wireless Controller"
-            (gamepads[padid].id.match("/^045e-02e0-/i"))) // "045e-02e0-8Bitdo SF30 Pro" or "045e-02e0-8BitDo GBros Adapter"
-        {
-          // PS4 DualShock 4
-          // 8Bitdo SF30 Pro GamePad (XInput mode)
-          // 8Bitdo GBros. Adapter (XInput mode)
-          gs.gamepadbuttons[4]=0;  // bottom button (right) x
-
-          gs.gamepadaxes=axes_0134;
-        }
-        else
-        if (gamepads[padid].id.match("/^054c-05c4-/i")) // "054c-0ce6-Sony Interactive Entertainment Wireless Controller" or "054c-0ce6-Wireless Controller"
-        {
-          // PS5 DualSense
-          gs.gamepadbuttons[4]=1;  // bottom button (right) x
-
-          gs.gamepadaxes[0]=0; // left/right axis
-          gs.gamepadaxes[1]=1; // up/down axis
-          gs.gamepadaxes[2]=2; // cam left/right axis
-          gs.gamepadaxes[3]=5; // cam up/down axis
-        }
-        else
-        if ((gamepads[padid].id.match("/^057e-2009-/i")) || // "057e-2009-Pro Controller"
-            (gamepads[padid].id.match("/^18d1-9400-/i"))) // "18d1-9400-Google Inc. Stadia Controller" or "18d1-9400-Google LLC Stadia Controller rev. A" or "^18d1-9400-Stadia"
-        {
-          // Nintendo Switch Pro Controller
-          // 8Bitdo SF30 Pro GamePad (Switch mode)
-          // 8Bitdo GBros. Adapter (Switch mode)
-          // Google Stadia Controller (Wired and Bluetooth)
-          gs.gamepadbuttons[4]=0;  // bottom button (right) x (a on Stadia)
-
-          gs.gamepadaxes=axes_0123;
-        }
-        else
-        if (gamepads[padid].id.match("/^2dc8-6100-/i")) // "2dc8-6100-8Bitdo SF30 Pro"
-        {
-          // 8Bitdo SF30 Pro GamePad (DInput mode)
-          gs.gamepadbuttons[4]=1;  // bottom button (right) x
-
-          gs.gamepadaxes=axes_0123;
-        }
-      }
-
       // Check analog axes
-      for (var i=0; i<gamepads[padid].axes.length; i++)
+      for (var i=0; i<gamepad.axes.length; i++)
       {
-        var val=gamepads[padid].axes[i];
+        var val=gamepad.axes[i];
 
         if (i==gs.gamepadaxes[0])
         {
@@ -298,9 +175,9 @@ function gamepadscan()
       }
 
       // Check buttons
-      for (i=0; i<gamepads[padid].buttons.length; i++)
+      for (i=0; i<gamepad.buttons.length; i++)
       {
-        var val=gamepads[padid].buttons[i];
+        var val=gamepad.buttons[i];
         var pressed=(val==1.0);
 
         if (typeof(val)=="object")
@@ -338,16 +215,144 @@ function gamepadscan()
       gs.padstate=newstate;
     }
   }
+}
 
-  // Detect disconnect
-  if ((found==0) && (gs.gamepad!=-1))
+function addGamepad(gamepad)
+{
+  if (gs.gamepad==-1)
   {
     if (gs.debug)
-      alert("Disconnected gamepad "+padid);
+      alert("Found new gamepad "+gamepad.index+" '"+gamepad.id+"'");
 
-    //console.log("Disconnected gamepad "+padid);
-    
+    // Cache gamepad id
+    gs.gamepad=gamepad.index;
+
+    // Reset button mappings
+    gs.gamepadbuttons.forEach((mapping) => {mapping=-1;});
+    // [0] left (left) d-left
+    // [1] right (left) d-right
+    // [2] top (left) d-up
+    // [3] bottom (left) d-down
+    // [4] bottom button (right) x
+
+    // Reset axes mappings
+    gs.gamepadaxes.forEach((mapping) => {mapping=-1;});
+    // [0] left/right axis
+    // [1] up/down axis
+    // [2] cam left/right axis
+    // [3] cam up/down axis
+
+    if (gamepad.mapping==="standard")
+    {
+      // Browser supported "standard" gamepad
+      gs.gamepadbuttons[0]=14; // left (left) d-left
+      gs.gamepadbuttons[1]=15; // right (left) d-right
+      gs.gamepadbuttons[2]=12; // top (left) d-up
+      gs.gamepadbuttons[3]=13; // bottom (left) d-down
+      gs.gamepadbuttons[4]=0;  // bottom button (right) x
+
+      gs.gamepadaxes=axes_0123;
+    }
+    else
+    if (gamepad.id.match("/^054c-0268-/i")) // "054c-0268-Sony PLAYSTATION(R)3 Controller"
+    {
+      // PS3 DualShock 3
+      gs.gamepadbuttons[0]=15; // left (left) d-left
+      gs.gamepadbuttons[1]=16; // right (left) d-right
+      gs.gamepadbuttons[2]=13; // top (left) d-up
+      gs.gamepadbuttons[3]=14; // bottom (left) d-down
+      gs.gamepadbuttons[4]=0;  // bottom button (right) x
+
+      gs.gamepadaxes=axes_0134;
+    }
+    else
+    if ((gamepad.id.match("/^045e-028e-/i")) || // "045e-028e-Microsoft X-Box 360 pad"
+        (gamepad.id.match("/^Xbox Wireless Controller/i")))
+    {
+      // XBOX 360
+      // XBOX Series S/X Wireless Controller
+      // 8Bitdo GBros. Adapter (XInput mode)
+      gs.gamepadbuttons[4]=0;  // bottom button (right) x
+
+      gs.gamepadaxes[0]=6; // left/right axis
+      gs.gamepadaxes[1]=7; // up/down axis
+      gs.gamepadaxes[2]=3; // cam left/right axis
+      gs.gamepadaxes[3]=4; // cam up/down axis
+    }
+    else
+    if (gamepad.id.match("/^0f0d-00c1-/i")) // "0f0d-00c1-  Switch Controller"
+    {
+      // Nintendo Switch
+      gs.gamepadbuttons[4]=1;  // bottom button (right) x
+
+      gs.gamepadaxes[0]=4; // left/right axis
+      gs.gamepadaxes[1]=5; // up/down axis
+      gs.gamepadaxes[2]=2; // cam left/right axis
+      gs.gamepadaxes[3]=3; // cam up/down axis
+    }
+    else
+    if ((gamepad.id.match("/^054c-05c4-/i")) ||  // "054c-05c4-Sony Computer Entertainment Wireless Controller"
+        (gamepad.id.match("/^045e-02e0-/i"))) // "045e-02e0-8Bitdo SF30 Pro" or "045e-02e0-8BitDo GBros Adapter"
+    {
+      // PS4 DualShock 4
+      // 8Bitdo SF30 Pro GamePad (XInput mode)
+      // 8Bitdo GBros. Adapter (XInput mode)
+      gs.gamepadbuttons[4]=0;  // bottom button (right) x
+
+      gs.gamepadaxes=axes_0134;
+    }
+    else
+    if (gamepad.id.match("/^054c-05c4-/i")) // "054c-0ce6-Sony Interactive Entertainment Wireless Controller" or "054c-0ce6-Wireless Controller"
+    {
+      // PS5 DualSense
+      gs.gamepadbuttons[4]=1;  // bottom button (right) x
+
+      gs.gamepadaxes[0]=0; // left/right axis
+      gs.gamepadaxes[1]=1; // up/down axis
+      gs.gamepadaxes[2]=2; // cam left/right axis
+      gs.gamepadaxes[3]=5; // cam up/down axis
+    }
+    else
+    if ((gamepad.id.match("/^057e-2009-/i")) || // "057e-2009-Pro Controller"
+        (gamepad.id.match("/^18d1-9400-/i"))) // "18d1-9400-Google Inc. Stadia Controller" or "18d1-9400-Google LLC Stadia Controller rev. A" or "^18d1-9400-Stadia"
+    {
+      // Nintendo Switch Pro Controller
+      // 8Bitdo SF30 Pro GamePad (Switch mode)
+      // 8Bitdo GBros. Adapter (Switch mode)
+      // Google Stadia Controller (Wired and Bluetooth)
+      gs.gamepadbuttons[4]=0;  // bottom button (right) x (a on Stadia)
+
+      gs.gamepadaxes=axes_0123;
+    }
+    else
+    if (gamepad.id.match("/^2dc8-6100-/i")) // "2dc8-6100-8Bitdo SF30 Pro"
+    {
+      // 8Bitdo SF30 Pro GamePad (DInput mode)
+      gs.gamepadbuttons[4]=1;  // bottom button (right) x
+
+      gs.gamepadaxes=axes_0123;
+    }
+  }
+}
+
+function removeGamepad(gamepad)
+{
+  if (gs.debug)
+    alert("Disconnected gamepad "+gamepad.index);
+
+  // See if it's the pad we are using
+  if (gs.gamepad==gamepad.index)
+  {
     gs.gamepad=-1;
     gs.padstate=KEYNONE;
   }
 }
+
+window.addEventListener("gamepadconnected", (evt) => {
+  gs.debug=(_gup("debug")==1);
+  addGamepad(evt.gamepad);
+});
+
+window.addEventListener("gamepaddisconnected", (evt) => {
+  removeGamepad(evt.gamepad);
+});

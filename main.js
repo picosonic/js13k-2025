@@ -195,6 +195,7 @@ var gs={
   // Input
   keystate:KEYNONE,
   padstate:KEYNONE,
+  gamepad:-1, // Gamepad index
   gamepadbuttons:[], // Button mapping
   gamepadaxes:[], // Axes mapping
   gamepadaxesval:[], // Axes values
