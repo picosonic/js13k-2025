@@ -325,12 +325,18 @@ function addGamepad(gamepad)
       gs.gamepadaxes=axes_0123;
     }
     else
-    if (gamepad.id.match("/^2dc8-6100-/i")) // "2dc8-6100-8Bitdo SF30 Pro"
+    if ((gamepad.id.match("/^2dc8-6100-/i")) || // "2dc8-6100-8Bitdo SF30 Pro"
+        (gamepad.id.match("/^Retroid Pocket Controller/i")))
     {
       // 8Bitdo SF30 Pro GamePad (DInput mode)
       gs.gamepadbuttons[4]=1;  // bottom button (right) x
 
       gs.gamepadaxes=axes_0123;
+    }
+    else
+    {
+      if (gs.debug)
+        alert("Unknown gamepad mapping");
     }
   }
 }
