@@ -139,7 +139,7 @@ function gamepadscan()
 
     // If found by scan before event - register it
     if ((gs.gamepad==-1) && (gamepad.connected))
-      gs.gamepad=gamepad.index;
+      addGamepad(gamepad);
 
     // Only support first found gamepad
     if ((gs.gamepad==gamepad.index) && (gamepad.connected))
@@ -366,10 +366,8 @@ function removeGamepad(gamepad)
 
 window.addEventListener("gamepadconnected", (evt) => {
   addGamepad(evt.gamepad);
-  evt.preventDefault();
 });
 
 window.addEventListener("gamepaddisconnected", (evt) => {
   removeGamepad(evt.gamepad);
-  evt.preventDefault();
 });
